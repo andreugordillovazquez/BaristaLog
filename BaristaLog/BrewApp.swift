@@ -1,18 +1,19 @@
 //
-//  BaristaLogApp.swift
-//  BaristaLog
-//
-//  Created by Andreu Gordillo Vázquez on 14/2/26.
+//  BrewApp.swift
+//  Brew
 //
 
 import SwiftUI
 import SwiftData
 
 @main
-struct BaristaLogApp: App {
+struct BrewApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Extraction.self,
+            Bean.self,
+            Grinder.self,
+            Brewer.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +26,7 @@ struct BaristaLogApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
         .modelContainer(sharedModelContainer)
     }
