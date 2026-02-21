@@ -28,36 +28,36 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            Group {
                 if extractions.isEmpty {
-                    ContentUnavailableView(
-                        "No Extractions",
-                        systemImage: "cup.and.saucer",
-                        description: Text("Add your first shot to get started.")
-                    )
+                    ExtractionEmptyStateView {
+                        showingAddExtraction = true
+                    }
                 } else {
-                    ForEach(groupedExtractions, id: \.date) { group in
-                        Section {
-                            ForEach(group.extractions) { extraction in
-                                NavigationLink {
-                                    ExtractionDetailView(extraction: extraction)
-                                } label: {
-                                    ExtractionRowView(extraction: extraction)
+                    List {
+                        ForEach(groupedExtractions, id: \.date) { group in
+                            Section {
+                                ForEach(group.extractions) { extraction in
+                                    NavigationLink {
+                                        ExtractionDetailView(extraction: extraction)
+                                    } label: {
+                                        ExtractionRowView(extraction: extraction)
+                                    }
                                 }
+                                .onDelete { offsets in
+                                    deleteExtractions(from: group.extractions, at: offsets)
+                                }
+                            } header: {
+                                Text(formatSectionDate(group.date))
+                                    .textCase(nil)
                             }
-                            .onDelete { offsets in
-                                deleteExtractions(from: group.extractions, at: offsets)
-                            }
-                        } header: {
-                            Text(formatSectionDate(group.date))
-                                .textCase(nil)
                         }
                     }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.visible)
+                    .headerProminence(.increased)
                 }
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.visible)
-            .headerProminence(.increased)
             .navigationTitle("BaristaLog")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -159,6 +159,54 @@ struct CompactIconLabelStyle: LabelStyle {
                 .imageScale(.small)
             configuration.title
         }
+    }
+}
+
+// MARK: - Extraction Empty State
+
+struct ExtractionEmptyStateView: View {
+    let action: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(Color.brandBrown.opacity(0.12))
+                    .frame(width: 88, height: 88)
+                Image(systemName: "cup.and.saucer.fill")
+                    .font(.system(size: 36, weight: .medium))
+                    .foregroundStyle(Color.brandBrown)
+            }
+
+            VStack(spacing: 8) {
+                Text("No Extractions Yet")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text("Log your first espresso shot\nto start tracking your brews.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 20)
+
+            Button(action: action) {
+                Text("Log First Shot")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .frame(minWidth: 160)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.glassProminent)
+            .tint(Color.brandBrown)
+            .padding(.top, 24)
+
+            Spacer()
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
