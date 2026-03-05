@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 import FoundationModels
 
 struct SettingsView: View {
@@ -23,6 +24,9 @@ struct SettingsView: View {
     @AppStorage("defaultBrewerName") private var defaultBrewerName: String = ""
 
     @State private var showingResetConfirmation = false
+    @State private var showingExportOptions = false
+    @State private var exportedFileURL: URL?
+    @State private var exportError: String?
 
     var body: some View {
         NavigationStack {
@@ -90,11 +94,20 @@ struct SettingsView: View {
                 // MARK: - Data
                 Section {
                     Button {
-                        // TODO: Implement export
+                        showingExportOptions = true
                     } label: {
                         Label("Export Data", systemImage: "square.and.arrow.up")
                     }
-                    .disabled(true)
+                    .confirmationDialog("Export Format", isPresented: $showingExportOptions) {
+                        Button("CSV (Extractions)") {
+                            exportData(format: .csv)
+                        }
+                        Button("JSON (All Data)") {
+                            exportData(format: .json)
+                        }
+                    } message: {
+                        Text("Choose an export format")
+                    }
 
                     Button(role: .destructive) {
                         showingResetConfirmation = true
@@ -114,8 +127,6 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("Data")
-                } footer: {
-                    Text("Export will be available in a future update.")
                 }
 
                 // MARK: - Debug
@@ -132,6 +143,14 @@ struct SettingsView: View {
             .formStyle(.grouped)
             .scrollContentBackground(.visible)
             .navigationTitle("Settings")
+            .sheet(item: $exportedFileURL) { url in
+                ShareSheet(activityItems: [url])
+            }
+            .alert("Export Failed", isPresented: .init(get: { exportError != nil }, set: { if !$0 { exportError = nil } })) {
+                Button("OK") { exportError = nil }
+            } message: {
+                Text(exportError ?? "")
+            }
         }
     }
 
@@ -145,6 +164,25 @@ struct SettingsView: View {
 
     private var isAppleIntelligenceAvailable: Bool {
         SystemLanguageModel.default.availability == .available
+    }
+
+    private enum ExportFormat {
+        case csv, json
+    }
+
+    private func exportData(format: ExportFormat) {
+        do {
+            let url: URL
+            switch format {
+            case .csv:
+                url = try DataExportService.exportExtractionsCSV(context: modelContext)
+            case .json:
+                url = try DataExportService.exportAllJSON(context: modelContext)
+            }
+            exportedFileURL = url
+        } catch {
+            exportError = error.localizedDescription
+        }
     }
 
     private func resetAllData() {
@@ -168,6 +206,22 @@ struct SettingsView: View {
     }
 }
 
+
+// MARK: - ShareSheet
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
+}
 
 #Preview {
     SettingsView()
