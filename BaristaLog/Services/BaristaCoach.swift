@@ -38,9 +38,19 @@ final class BaristaCoach {
         analyzedExtractionDate = extraction.date
 
         let instructions = """
-        You are an expert barista coach. Analyze the espresso extraction data and provide a brief, \
-        friendly 2-3 sentence summary. Include what went well and one key tip for improvement. \
-        Be concise and encouraging. Ideal espresso: ratio ~1:2, time 25-35 seconds.
+        You are a barista coach inside a coffee tracking app. The user just pulled an espresso shot \
+        and wants brief feedback.
+
+        RULES:
+        - Reply in exactly 2 plain-text sentences. No markdown, no bullets, no emoji, no headings.
+        - Sentence 1: Assess the shot. Compare ratio to the 1:2 target and time to the 25-35 s window. \
+        Say whether it looks good, under-extracted, or over-extracted.
+        - Sentence 2: Give one specific actionable adjustment (e.g. grind finer/coarser, change dose, \
+        adjust time) or say "Looks dialed in, keep it up" if the numbers are on target.
+        - If dose, yield, or time are missing, base your feedback only on the data provided and note \
+        what recording those values would help with.
+        - Do NOT discuss bean origins, flavor theory, or brewing history. Focus only on the shot data.
+        - Keep the tone friendly and concise.
         """
 
         session = LanguageModelSession(instructions: instructions)
@@ -58,47 +68,53 @@ final class BaristaCoach {
     }
 
     private func buildPrompt(for extraction: Extraction, previous: [Extraction]) -> String {
-        var prompt = "Analyze this shot:\n"
+        var lines: [String] = []
 
-        prompt += "Bean: \(extraction.bean?.name ?? "Unknown")\n"
-        prompt += "Grind: \(extraction.grindSetting)\n"
+        lines.append("Grind setting: \(extraction.grindSetting)")
 
         if let dose = extraction.doseIn {
-            prompt += "Dose: \(String(format: "%.1f", dose))g\n"
+            lines.append("Dose in: \(String(format: "%.1f", dose)) g")
         }
 
         if let yield = extraction.yieldOut {
-            prompt += "Yield: \(String(format: "%.1f", yield))g\n"
+            lines.append("Yield out: \(String(format: "%.1f", yield)) g")
         }
 
         if let dose = extraction.doseIn, let yield = extraction.yieldOut, dose > 0 {
-            prompt += "Ratio: 1:\(String(format: "%.1f", yield / dose))\n"
+            lines.append("Ratio: 1:\(String(format: "%.1f", yield / dose))")
         }
 
         if let time = extraction.timeSeconds {
-            prompt += "Time: \(Int(time))s\n"
+            lines.append("Time: \(Int(time)) s")
         }
 
-        if let notes = extraction.notes, !notes.isEmpty {
-            prompt += "Notes: \(notes)\n"
+        if let rating = extraction.rating {
+            lines.append("User rating: \(rating)/5")
         }
 
-        // Previous extractions for context
+        // Previous extractions for trend context (same bean only)
         let relevantPrevious = previous
             .filter { $0.bean?.name == extraction.bean?.name }
-            .prefix(2)
+            .prefix(3)
 
         if !relevantPrevious.isEmpty {
-            prompt += "\nRecent shots with same bean: "
+            lines.append("")
+            lines.append("Recent shots with same bean for context:")
             for prev in relevantPrevious {
-                prompt += "Grind \(prev.grindSetting)"
-                if let time = prev.timeSeconds {
-                    prompt += " / \(Int(time))s"
+                var parts = ["Grind \(prev.grindSetting)"]
+                if let dose = prev.doseIn, let yield = prev.yieldOut, dose > 0 {
+                    parts.append("ratio 1:\(String(format: "%.1f", yield / dose))")
                 }
-                prompt += "; "
+                if let time = prev.timeSeconds {
+                    parts.append("\(Int(time)) s")
+                }
+                if let rating = prev.rating {
+                    parts.append("\(rating)/5")
+                }
+                lines.append("- " + parts.joined(separator: ", "))
             }
         }
 
-        return prompt
+        return lines.joined(separator: "\n")
     }
 }
