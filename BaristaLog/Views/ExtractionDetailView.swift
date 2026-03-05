@@ -15,15 +15,27 @@ struct ExtractionDetailView: View {
         allExtractions.filter { $0.id != extraction.id }
     }
 
+    private var ratioValue: Double? {
+        guard let dose = extraction.doseIn, let yield = extraction.yieldOut, dose > 0 else { return nil }
+        return yield / dose
+    }
+
     var body: some View {
-        Form {
-            // MARK: - AI Summary
+        List {
+            // MARK: - Shot Hero Card
+            Section {
+                shotHeroCard
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+
+            // MARK: - AI Coaching
             CoachingView(
                 extraction: extraction,
                 previousExtractions: previousExtractions
             )
 
-            // MARK: - Equipment Section
+            // MARK: - Equipment
             Section("Equipment") {
                 LabeledContent("Bean", value: extraction.bean?.name ?? "–")
                 if let roaster = extraction.bean?.roaster {
@@ -36,7 +48,7 @@ struct ExtractionDetailView: View {
                 }
             }
 
-            // MARK: - Grind Section
+            // MARK: - Grind
             Section("Grind") {
                 LabeledContent("Grind Setting", value: extraction.grindSetting)
                 if let adjustmentNotes = extraction.grinder?.adjustmentNotes {
@@ -44,25 +56,7 @@ struct ExtractionDetailView: View {
                 }
             }
 
-            // MARK: - Measurements Section
-            if extraction.doseIn != nil || extraction.yieldOut != nil || extraction.timeSeconds != nil {
-                Section("Measurements") {
-                    if let dose = extraction.doseIn {
-                        LabeledContent("Dose In", value: "\(formatted(dose)) g")
-                    }
-                    if let yield = extraction.yieldOut {
-                        LabeledContent("Yield Out", value: "\(formatted(yield)) g")
-                    }
-                    if let time = extraction.timeSeconds {
-                        LabeledContent("Time", value: formatTime(time))
-                    }
-                    if let dose = extraction.doseIn, let yield = extraction.yieldOut, dose > 0 {
-                        LabeledContent("Ratio", value: "1:\(formatted(yield / dose))")
-                    }
-                }
-            }
-
-            // MARK: - Rating Section
+            // MARK: - Rating
             if let rating = extraction.rating {
                 Section("Rating") {
                     HStack(spacing: 4) {
@@ -75,7 +69,7 @@ struct ExtractionDetailView: View {
                 }
             }
 
-            // MARK: - Notes Section
+            // MARK: - Notes
             if let notes = extraction.notes, !notes.isEmpty {
                 Section("Notes") {
                     Text(notes)
@@ -83,7 +77,7 @@ struct ExtractionDetailView: View {
                 }
             }
         }
-        .formStyle(.grouped)
+        .listStyle(.insetGrouped)
         .scrollContentBackground(.visible)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -107,6 +101,67 @@ struct ExtractionDetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             AddExtractionView(extractionToEdit: extraction)
         }
+    }
+
+    // MARK: - Shot Hero Card
+
+    @ViewBuilder
+    private var shotHeroCard: some View {
+        VStack(spacing: 20) {
+            // Ratio hero
+            if let ratio = ratioValue {
+                VStack(spacing: 4) {
+                    Text("1:\(String(format: "%.1f", ratio))")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.brandBrown)
+                    Text("ratio")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                }
+            }
+
+            // Measurement pills
+            HStack(spacing: 0) {
+                if let dose = extraction.doseIn {
+                    metricCell(value: formatted(dose), unit: "g", label: "Dose")
+                }
+                if extraction.doseIn != nil && extraction.yieldOut != nil {
+                    Divider().frame(height: 36)
+                }
+                if let yield = extraction.yieldOut {
+                    metricCell(value: formatted(yield), unit: "g", label: "Yield")
+                }
+                if (extraction.doseIn != nil || extraction.yieldOut != nil) && extraction.timeSeconds != nil {
+                    Divider().frame(height: 36)
+                }
+                if let time = extraction.timeSeconds {
+                    metricCell(value: formatTime(time), unit: "", label: "Time")
+                }
+            }
+        }
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func metricCell(value: String, unit: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 2) {
+                Text(value)
+                    .font(.title2.bold().monospacedDigit())
+                if !unit.isEmpty {
+                    Text(unit)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func formatted(_ value: Double) -> String {
