@@ -6,11 +6,20 @@
 import SwiftUI
 
 extension Color {
-    /// Primary brand color (#6A503B)
-    static let brandBrown = Color(hex: "69503A")
-    
+    /// Primary brand color - adapts for dark mode
+    static let brandBrown = Color(light: "69503A", dark: "C4956E")
+
     /// Alias for primary brand color
     static let main = Color.brandBrown
+}
+
+extension Color {
+    /// Creates a color that adapts between light and dark mode
+    init(light: String, dark: String) {
+        self.init(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(Color(hex: dark)) : UIColor(Color(hex: light))
+        })
+    }
 }
 
 // MARK: - Hex Color Initializer

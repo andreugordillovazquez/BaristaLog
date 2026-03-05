@@ -10,6 +10,8 @@ struct ExtractionDetailView: View {
     @Bindable var extraction: Extraction
     @Query(sort: \Extraction.date, order: .reverse) private var allExtractions: [Extraction]
     @State private var showingEditSheet = false
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .grams
+    @AppStorage("weightPrecision") private var weightPrecision: WeightPrecision = .oneDecimal
 
     private var previousExtractions: [Extraction] {
         allExtractions.filter { $0.id != extraction.id }
@@ -124,13 +126,15 @@ struct ExtractionDetailView: View {
             // Measurement pills
             HStack(spacing: 0) {
                 if let dose = extraction.doseIn {
-                    metricCell(value: formatted(dose), unit: "g", label: "Dose")
+                    let unitLabel = WeightFormatter.unitLabel(for: weightUnit)
+                    metricCell(value: WeightFormatter.formatValue(grams: dose, unit: weightUnit, precision: weightPrecision), unit: unitLabel, label: "Dose")
                 }
                 if extraction.doseIn != nil && extraction.yieldOut != nil {
                     Divider().frame(height: 36)
                 }
                 if let yield = extraction.yieldOut {
-                    metricCell(value: formatted(yield), unit: "g", label: "Yield")
+                    let unitLabel = WeightFormatter.unitLabel(for: weightUnit)
+                    metricCell(value: WeightFormatter.formatValue(grams: yield, unit: weightUnit, precision: weightPrecision), unit: unitLabel, label: "Yield")
                 }
                 if (extraction.doseIn != nil || extraction.yieldOut != nil) && extraction.timeSeconds != nil {
                     Divider().frame(height: 36)
@@ -162,13 +166,6 @@ struct ExtractionDetailView: View {
                 .textCase(.uppercase)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func formatted(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 1
-        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 
     private func formatTime(_ seconds: Double) -> String {

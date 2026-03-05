@@ -117,14 +117,16 @@ struct ContentView: View {
 
 struct ExtractionRowView: View {
     let extraction: Extraction
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .grams
+    @AppStorage("weightPrecision") private var weightPrecision: WeightPrecision = .oneDecimal
 
     private var measurementLine: String? {
         var parts: [String] = []
         if let dose = extraction.doseIn {
-            parts.append(formatted(dose) + "g")
+            parts.append(WeightFormatter.format(grams: dose, unit: weightUnit, precision: weightPrecision))
         }
         if let yield = extraction.yieldOut {
-            parts.append(formatted(yield) + "g")
+            parts.append(WeightFormatter.format(grams: yield, unit: weightUnit, precision: weightPrecision))
         }
         let dosePart = parts.joined(separator: " → ")
 
@@ -190,13 +192,6 @@ struct ExtractionRowView: View {
             HStack(spacing: 12) { grind; grinder; brewer }
             VStack(alignment: .leading, spacing: 4) { grind; grinder; brewer }
         }
-    }
-
-    private func formatted(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 1
-        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
     }
 
     private func formatTime(_ seconds: Double) -> String {

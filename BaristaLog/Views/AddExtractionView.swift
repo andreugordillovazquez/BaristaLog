@@ -16,6 +16,7 @@ struct AddExtractionView: View {
 
     @AppStorage("defaultGrinderName") private var defaultGrinderName: String = ""
     @AppStorage("defaultBrewerName") private var defaultBrewerName: String = ""
+    @AppStorage("weightUnit") private var weightUnit: WeightUnit = .grams
 
     // Existing extraction for edit mode
     var extractionToEdit: Extraction?
@@ -81,7 +82,7 @@ struct AddExtractionView: View {
                     HStack {
                         Text("Dose In")
                         Spacer()
-                        TextField("g", value: $doseIn, format: .number)
+                        TextField(WeightFormatter.unitLabel(for: weightUnit), value: $doseIn, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
@@ -90,7 +91,7 @@ struct AddExtractionView: View {
                     HStack {
                         Text("Yield Out")
                         Spacer()
-                        TextField("g", value: $yieldOut, format: .number)
+                        TextField(WeightFormatter.unitLabel(for: weightUnit), value: $yieldOut, format: .number)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)

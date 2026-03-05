@@ -55,6 +55,43 @@ enum WeightPrecision: String, CaseIterable {
     }
 }
 
+// MARK: - Weight Formatter
+
+enum WeightFormatter {
+    static func format(grams: Double, unit: WeightUnit, precision: WeightPrecision) -> String {
+        let value: Double
+        let symbol: String
+        switch unit {
+        case .grams:
+            value = grams
+            symbol = "g"
+        case .ounces:
+            value = grams / 28.349523125
+            symbol = "oz"
+        }
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = precision.decimals
+        formatter.maximumFractionDigits = precision.decimals
+        let number = formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+        return "\(number)\(symbol)"
+    }
+
+    static func unitLabel(for unit: WeightUnit) -> String {
+        switch unit {
+        case .grams: return "g"
+        case .ounces: return "oz"
+        }
+    }
+
+    static func formatValue(grams: Double, unit: WeightUnit, precision: WeightPrecision) -> String {
+        let value: Double = unit == .grams ? grams : grams / 28.349523125
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = precision.decimals
+        formatter.maximumFractionDigits = precision.decimals
+        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+}
+
 // MARK: - App Theme
 
 /// Defines the available color scheme options for the app
