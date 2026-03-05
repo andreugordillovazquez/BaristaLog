@@ -14,8 +14,8 @@ struct AddExtractionView: View {
     @Query(sort: \Grinder.name) private var grinders: [Grinder]
     @Query(sort: \Brewer.name) private var brewers: [Brewer]
 
-    @AppStorage("defaultGrinderName") private var defaultGrinderName: String = ""
-    @AppStorage("defaultBrewerName") private var defaultBrewerName: String = ""
+    @AppStorage("defaultGrinderID") private var defaultGrinderID: String = ""
+    @AppStorage("defaultBrewerID") private var defaultBrewerID: String = ""
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .grams
 
     // Existing extraction for edit mode
@@ -154,11 +154,11 @@ struct AddExtractionView: View {
                     doseIn = template.doseIn
                     // Don't copy yield, time, rating, or notes - those are specific to each shot
                 } else {
-                    if selectedGrinder == nil, !defaultGrinderName.isEmpty {
-                        selectedGrinder = grinders.first { $0.name == defaultGrinderName }
+                    if selectedGrinder == nil, let id = UUID(uuidString: defaultGrinderID) {
+                        selectedGrinder = grinders.first { $0.stableID == id }
                     }
-                    if selectedBrewer == nil, !defaultBrewerName.isEmpty {
-                        selectedBrewer = brewers.first { $0.name == defaultBrewerName }
+                    if selectedBrewer == nil, let id = UUID(uuidString: defaultBrewerID) {
+                        selectedBrewer = brewers.first { $0.stableID == id }
                     }
                 }
                 isGrindSettingFocused = true

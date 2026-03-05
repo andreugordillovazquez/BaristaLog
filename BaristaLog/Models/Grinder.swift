@@ -12,7 +12,10 @@ import SwiftData
 @Model
 final class Grinder {
     // MARK: - Required Properties
-    
+
+    /// Stable identifier for referencing this grinder in preferences (e.g., default equipment)
+    var stableID: UUID = UUID()
+
     /// The name or model of the grinder (e.g., "Niche Zero", "Baratza Sette 270")
     var name: String
 
