@@ -48,7 +48,7 @@ struct ContentView: View {
                                     deleteExtractions(from: group.extractions, at: offsets)
                                 }
                             } header: {
-                                Text(formatSectionDate(group.date))
+                                Text("\(formatSectionDate(group.date)) · \(group.extractions.count)")
                                     .textCase(nil)
                             }
                         }
@@ -97,8 +97,10 @@ struct ContentView: View {
             return "Today"
         } else if calendar.isDateInYesterday(date) {
             return "Yesterday"
+        } else if let daysAgo = calendar.dateComponents([.day], from: calendar.startOfDay(for: date), to: calendar.startOfDay(for: .now)).day, daysAgo < 7 {
+            return date.formatted(.dateTime.weekday(.wide))
         } else {
-            return date.formatted(.dateTime.weekday(.wide).day().month(.wide))
+            return date.formatted(.dateTime.day().month(.wide))
         }
     }
 
@@ -115,6 +117,31 @@ struct ContentView: View {
 
 struct ExtractionRowView: View {
     let extraction: Extraction
+
+    private var measurementLine: String? {
+        var parts: [String] = []
+        if let dose = extraction.doseIn {
+            parts.append(formatted(dose) + "g")
+        }
+        if let yield = extraction.yieldOut {
+            parts.append(formatted(yield) + "g")
+        }
+        let dosePart = parts.joined(separator: " → ")
+
+        var result = dosePart
+        if let time = extraction.timeSeconds {
+            let timeStr = formatTime(time)
+            if !timeStr.isEmpty {
+                result = result.isEmpty ? timeStr : result + " · " + timeStr
+            }
+        }
+        return result.isEmpty ? nil : result
+    }
+
+    private var ratioText: String? {
+        guard let dose = extraction.doseIn, let yield = extraction.yieldOut, dose > 0 else { return nil }
+        return "1:\(String(format: "%.1f", yield / dose))"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -133,17 +160,52 @@ struct ExtractionRowView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 6) {
-                Label(extraction.grindSetting, systemImage: "slider.horizontal.3")
-                Label(extraction.grinder?.name ?? "–", systemImage: "circle.dotted")
-                Label(extraction.brewer?.name ?? "–", systemImage: "cup.and.saucer")
+            if let measurement = measurementLine {
+                HStack(spacing: 6) {
+                    Text(measurement)
+                    if let ratio = ratioText {
+                        Text("(\(ratio))")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .font(.subheadline.monospacedDigit())
             }
-            .font(.subheadline)
-            .labelStyle(CompactIconLabelStyle(iconSpacing: 4))
-            .symbolRenderingMode(.hierarchical)
-            .foregroundStyle(.secondary)
+
+            equipmentRow
+                .font(.caption)
+                .labelStyle(CompactIconLabelStyle(iconSpacing: 3))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var equipmentRow: some View {
+        let grind = Label(extraction.grindSetting, systemImage: "slider.horizontal.3")
+        let grinder = Label(extraction.grinder?.name ?? "–", systemImage: "circle.dotted")
+        let brewer = Label(extraction.brewer?.name ?? "–", systemImage: "cup.and.saucer")
+
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { grind; grinder; brewer }
+            VStack(alignment: .leading, spacing: 4) { grind; grinder; brewer }
+        }
+    }
+
+    private func formatted(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 1
+        return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+
+    private func formatTime(_ seconds: Double) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        if mins > 0 {
+            return "\(mins)m \(secs)s"
+        }
+        return "\(secs)s"
     }
 }
 
