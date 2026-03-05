@@ -12,7 +12,10 @@ import SwiftData
 @Model
 final class Brewer {
     // MARK: - Required Properties
-    
+
+    /// Stable identifier for referencing this brewer in preferences (e.g., default equipment)
+    var stableID: UUID = UUID()
+
     /// The name or model of the espresso machine (e.g., "Gaggia Classic Pro")
     var name: String
 

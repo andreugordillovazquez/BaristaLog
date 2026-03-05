@@ -20,8 +20,8 @@ struct SettingsView: View {
     @Query(sort: \Grinder.name) private var grinders: [Grinder]
     @Query(sort: \Brewer.name) private var brewers: [Brewer]
 
-    @AppStorage("defaultGrinderName") private var defaultGrinderName: String = ""
-    @AppStorage("defaultBrewerName") private var defaultBrewerName: String = ""
+    @AppStorage("defaultGrinderID") private var defaultGrinderID: String = ""
+    @AppStorage("defaultBrewerID") private var defaultBrewerID: String = ""
 
     @State private var showingResetConfirmation = false
     @State private var showingExportOptions = false
@@ -72,17 +72,17 @@ struct SettingsView: View {
 
                 // MARK: - Defaults
                 Section {
-                    Picker("Default Grinder", selection: $defaultGrinderName) {
+                    Picker("Default Grinder", selection: $defaultGrinderID) {
                         Text("None").tag("")
                         ForEach(grinders) { grinder in
-                            Text(grinder.name).tag(grinder.name)
+                            Text(grinder.name).tag(grinder.stableID.uuidString)
                         }
                     }
 
-                    Picker("Default Brewer", selection: $defaultBrewerName) {
+                    Picker("Default Brewer", selection: $defaultBrewerID) {
                         Text("None").tag("")
                         ForEach(brewers) { brewer in
-                            Text(brewer.name).tag(brewer.name)
+                            Text(brewer.name).tag(brewer.stableID.uuidString)
                         }
                     }
                 } header: {
@@ -201,8 +201,8 @@ struct SettingsView: View {
         weightPrecision = .oneDecimal
         appTheme = .system
         aiCoachingEnabled = true
-        defaultGrinderName = ""
-        defaultBrewerName = ""
+        defaultGrinderID = ""
+        defaultBrewerID = ""
     }
 }
 

@@ -12,8 +12,8 @@ struct OnboardingFlowView: View {
     @AppStorage("startGuidedExtraction") private var startGuidedExtraction = false
     @AppStorage("weightUnit") private var weightUnit: WeightUnit = .grams
     @AppStorage("weightPrecision") private var weightPrecision: WeightPrecision = .oneDecimal
-    @AppStorage("defaultGrinderName") private var defaultGrinderName: String = ""
-    @AppStorage("defaultBrewerName") private var defaultBrewerName: String = ""
+    @AppStorage("defaultGrinderID") private var defaultGrinderID: String = ""
+    @AppStorage("defaultBrewerID") private var defaultBrewerID: String = ""
     @AppStorage("aiCoachingEnabled") private var aiCoachingEnabled = true
 
     @Query(sort: \Grinder.name) private var grinders: [Grinder]
@@ -358,10 +358,10 @@ struct OnboardingFlowView: View {
                                     .font(.callout)
                                     .foregroundStyle(Color(.secondaryLabel))
                                 Spacer()
-                                Picker("Grinder", selection: $defaultGrinderName) {
+                                Picker("Grinder", selection: $defaultGrinderID) {
                                     Text("None").tag("")
                                     ForEach(grinders) { grinder in
-                                        Text(grinder.name).tag(grinder.name)
+                                        Text(grinder.name).tag(grinder.stableID.uuidString)
                                     }
                                 }
                                 .labelsHidden()
@@ -384,10 +384,10 @@ struct OnboardingFlowView: View {
                                     .font(.callout)
                                     .foregroundStyle(Color(.secondaryLabel))
                                 Spacer()
-                                Picker("Brewer", selection: $defaultBrewerName) {
+                                Picker("Brewer", selection: $defaultBrewerID) {
                                     Text("None").tag("")
                                     ForEach(brewers) { brewer in
-                                        Text(brewer.name).tag(brewer.name)
+                                        Text(brewer.name).tag(brewer.stableID.uuidString)
                                     }
                                 }
                                 .labelsHidden()
