@@ -21,12 +21,12 @@ struct BeanDetailView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 220)
+                            .frame(height: 160)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     } else {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.brandBrown.opacity(0.12))
-                            .frame(height: 220)
+                            .frame(height: 160)
                             .overlay {
                                 Image(systemName: "leaf.fill")
                                     .font(.system(size: 40))
@@ -34,8 +34,8 @@ struct BeanDetailView: View {
                             }
                     }
 
-                    // Name and subtitle
-                    VStack(alignment: .leading, spacing: 4) {
+                    // Name, subtitle, freshness, and flavor tags
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(bean.name)
                             .font(.title)
                             .fontWeight(.bold)
@@ -44,6 +44,28 @@ struct BeanDetailView: View {
                             Text([bean.roaster, bean.origin].compactMap { $0 }.joined(separator: " · "))
                                 .font(.body)
                                 .foregroundStyle(.secondary)
+                        }
+
+                        if let roastDate = bean.roastDate {
+                            Text("Roasted \(daysSince(roastDate)) days ago")
+                                .font(.subheadline)
+                                .foregroundStyle(.tertiary)
+                        }
+
+                        // Flavor tags
+                        if let tags = bean.flavorTags, !tags.isEmpty {
+                            FlowLayout(spacing: 8) {
+                                ForEach(tags, id: \.self) { tag in
+                                    Text(tag)
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background(Color.brandBrown.opacity(0.15))
+                                        .foregroundStyle(Color.brandBrown)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.top, 2)
                         }
                     }
                 }
@@ -56,57 +78,26 @@ struct BeanDetailView: View {
             .listRowBackground(Color.clear)
 
             // MARK: - Details
-            if bean.process != nil || bean.roastLevel != nil || bean.varietal != nil || bean.altitude != nil {
-                Section("Details") {
-                    if let process = bean.process {
-                        LabeledContent("Process", value: process)
-                    }
-                    if let roastLevel = bean.roastLevel {
-                        LabeledContent("Roast Level", value: roastLevel)
-                    }
-                    if let varietal = bean.varietal {
-                        LabeledContent("Varietal", value: varietal)
-                    }
-                    if let altitude = bean.altitude {
-                        LabeledContent("Altitude", value: "\(altitude) masl")
-                    }
+            Section {
+                if let process = bean.process {
+                    LabeledContent("Process", value: process)
                 }
-            }
-
-            // MARK: - Flavor Profile
-            if let tags = bean.flavorTags, !tags.isEmpty {
-                Section("Flavor Profile") {
-                    FlowLayout(spacing: 8) {
-                        ForEach(tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(.subheadline)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.brandBrown.opacity(0.15))
-                                .foregroundStyle(Color.brandBrown)
-                                .clipShape(Capsule())
-                        }
-                    }
+                if let roastLevel = bean.roastLevel {
+                    LabeledContent("Roast Level", value: roastLevel)
                 }
-            }
-
-            // MARK: - Dates
-            if bean.roastDate != nil || bean.openedDate != nil {
-                Section("Dates") {
-                    if let roastDate = bean.roastDate {
-                        LabeledContent("Roasted", value: roastDate, format: .dateTime.day().month().year())
-                        LabeledContent("Days since roast", value: "\(daysSince(roastDate))")
-                    }
-                    if let openedDate = bean.openedDate {
-                        LabeledContent("Opened", value: openedDate, format: .dateTime.day().month().year())
-                        LabeledContent("Days since opened", value: "\(daysSince(openedDate))")
-                    }
+                if let varietal = bean.varietal {
+                    LabeledContent("Varietal", value: varietal)
                 }
-            }
-
-            // MARK: - Notes
-            if let notes = bean.notes, !notes.isEmpty {
-                Section("Notes") {
+                if let altitude = bean.altitude {
+                    LabeledContent("Altitude", value: "\(altitude) masl")
+                }
+                if let roastDate = bean.roastDate {
+                    LabeledContent("Roast Date", value: roastDate, format: .dateTime.day().month().year())
+                }
+                if let openedDate = bean.openedDate {
+                    LabeledContent("Opened", value: openedDate, format: .dateTime.day().month().year())
+                }
+                if let notes = bean.notes, !notes.isEmpty {
                     Text(notes)
                         .foregroundStyle(.secondary)
                 }
@@ -116,26 +107,30 @@ struct BeanDetailView: View {
             if let extractions = bean.extractions, !extractions.isEmpty {
                 Section("Extractions (\(extractions.count))") {
                     ForEach(Array(extractions.sorted(by: { $0.date > $1.date }).prefix(5))) { extraction in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(extractionSummary(extraction))
-                                    .font(.subheadline)
-                                Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if let rating = extraction.rating {
-                                HStack(spacing: 2) {
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .foregroundStyle(star <= rating ? Color.brandBrown : .secondary)
-                                    }
+                        NavigationLink {
+                            ExtractionDetailView(extraction: extraction)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(extractionSummary(extraction))
+                                        .font(.subheadline)
+                                    Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
-                                .font(.caption2)
+                                Spacer()
+                                if let rating = extraction.rating {
+                                    HStack(spacing: 2) {
+                                        ForEach(1...5, id: \.self) { star in
+                                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                                .foregroundStyle(star <= rating ? Color.brandBrown : .secondary)
+                                        }
+                                    }
+                                    .font(.caption2)
+                                }
                             }
+                            .padding(.vertical, 2)
                         }
-                        .padding(.vertical, 2)
                     }
                     if extractions.count > 5 {
                         Text("and \(extractions.count - 5) more...")
