@@ -78,29 +78,53 @@ struct BeanDetailView: View {
             .listRowBackground(Color.clear)
 
             // MARK: - Details
-            Section {
-                if let process = bean.process {
-                    LabeledContent("Process", value: process)
+            if hasDetails {
+                Section {
+                    if let process = bean.process {
+                        LabeledContent("Process", value: process)
+                    }
+                    if let roastLevel = bean.roastLevel {
+                        LabeledContent("Roast Level", value: roastLevel)
+                    }
+                    if let varietal = bean.varietal {
+                        LabeledContent("Varietal", value: varietal)
+                    }
+                    if let altitude = bean.altitude {
+                        LabeledContent("Altitude", value: "\(altitude) masl")
+                    }
+                    if let roastDate = bean.roastDate {
+                        LabeledContent("Roast Date", value: roastDate, format: .dateTime.day().month().year())
+                    }
+                    if let openedDate = bean.openedDate {
+                        LabeledContent("Opened", value: openedDate, format: .dateTime.day().month().year())
+                    }
+                    if let notes = bean.notes, !notes.isEmpty {
+                        Text(notes)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                if let roastLevel = bean.roastLevel {
-                    LabeledContent("Roast Level", value: roastLevel)
+            } else if bean.extractions?.isEmpty ?? true {
+                Section {
+                    VStack(spacing: 16) {
+                        Text("Add origin, roast level, flavor\nnotes and more.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Text("Add Details")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(Color.brandBrown)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
                 }
-                if let varietal = bean.varietal {
-                    LabeledContent("Varietal", value: varietal)
-                }
-                if let altitude = bean.altitude {
-                    LabeledContent("Altitude", value: "\(altitude) masl")
-                }
-                if let roastDate = bean.roastDate {
-                    LabeledContent("Roast Date", value: roastDate, format: .dateTime.day().month().year())
-                }
-                if let openedDate = bean.openedDate {
-                    LabeledContent("Opened", value: openedDate, format: .dateTime.day().month().year())
-                }
-                if let notes = bean.notes, !notes.isEmpty {
-                    Text(notes)
-                        .foregroundStyle(.secondary)
-                }
+                .listRowBackground(Color.clear)
             }
 
             // MARK: - Extractions
@@ -152,6 +176,16 @@ struct BeanDetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             AddBeanView(beanToEdit: bean)
         }
+    }
+
+    private var hasDetails: Bool {
+        bean.process != nil ||
+        bean.roastLevel != nil ||
+        bean.varietal != nil ||
+        bean.altitude != nil ||
+        bean.roastDate != nil ||
+        bean.openedDate != nil ||
+        (bean.notes != nil && !bean.notes!.isEmpty)
     }
 
     private func extractionSummary(_ extraction: Extraction) -> String {
