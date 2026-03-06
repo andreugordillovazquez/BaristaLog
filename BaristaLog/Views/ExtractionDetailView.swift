@@ -95,10 +95,8 @@ struct ExtractionDetailView: View {
                 }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button {
+                Button("Edit") {
                     showingEditSheet = true
-                } label: {
-                    Label("Edit", systemImage: "pencil")
                 }
             }
         }

@@ -46,10 +46,12 @@ struct OnboardingFlowView: View {
                     }
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 44, height: 44)
+                        .font(.title3.weight(.semibold))
+                        .padding(10)
                 }
                 .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .tint(.primary)
                 .accessibilityLabel("Back")
                 .opacity(stepIndex > 0 ? 1 : 0)
                 .animation(.easeInOut, value: stepIndex)
