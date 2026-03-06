@@ -11,29 +11,49 @@ struct BeanDetailView: View {
     @State private var showingEditSheet = false
 
     var body: some View {
-        Form {
-            // MARK: - Photo
-            if let imageData = bean.imageData, let uiImage = UIImage(data: imageData) {
-                Section {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxHeight: 300)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .listRowInsets(EdgeInsets())
-                }
-            }
-
-            // MARK: - Basic Info
+        List {
+            // MARK: - Hero Section
             Section {
-                LabeledContent("Name", value: bean.name)
-                if let roaster = bean.roaster {
-                    LabeledContent("Roaster", value: roaster)
+                VStack(alignment: .leading, spacing: 16) {
+                    // Image or placeholder
+                    if let imageData = bean.imageData, let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.brandBrown.opacity(0.12))
+                            .frame(height: 220)
+                            .overlay {
+                                Image(systemName: "leaf.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundStyle(Color.brandBrown)
+                            }
+                    }
+
+                    // Name and subtitle
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(bean.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+
+                        if bean.roaster != nil || bean.origin != nil {
+                            Text([bean.roaster, bean.origin].compactMap { $0 }.joined(separator: " · "))
+                                .font(.body)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                if let origin = bean.origin {
-                    LabeledContent("Origin", value: origin)
-                }
+                .listRowInsets(EdgeInsets())
+                .padding(.horizontal, 20)
+                .padding(.top, 0)
+                .padding(.bottom, 0)
             }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
 
             // MARK: - Details
             if bean.process != nil || bean.roastLevel != nil || bean.varietal != nil || bean.altitude != nil {
@@ -95,13 +115,27 @@ struct BeanDetailView: View {
             // MARK: - Extractions
             if let extractions = bean.extractions, !extractions.isEmpty {
                 Section("Extractions (\(extractions.count))") {
-                    ForEach(extractions.sorted(by: { $0.date > $1.date }).prefix(5), id: \.self) { extraction in
+                    ForEach(Array(extractions.sorted(by: { $0.date > $1.date }).prefix(5))) { extraction in
                         HStack {
-                            Text(extraction.grindSetting)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(extractionSummary(extraction))
+                                    .font(.subheadline)
+                                Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                             Spacer()
-                            Text(extraction.date, format: .dateTime.day().month())
-                                .foregroundStyle(.secondary)
+                            if let rating = extraction.rating {
+                                HStack(spacing: 2) {
+                                    ForEach(1...5, id: \.self) { star in
+                                        Image(systemName: star <= rating ? "star.fill" : "star")
+                                            .foregroundStyle(star <= rating ? Color.brandBrown : .secondary)
+                                    }
+                                }
+                                .font(.caption2)
+                            }
                         }
+                        .padding(.vertical, 2)
                     }
                     if extractions.count > 5 {
                         Text("and \(extractions.count - 5) more...")
@@ -110,6 +144,7 @@ struct BeanDetailView: View {
                 }
             }
         }
+        .contentMargins(.top, 8, for: .scrollContent)
         .navigationTitle("Bean")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -122,6 +157,23 @@ struct BeanDetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             AddBeanView(beanToEdit: bean)
         }
+    }
+
+    private func extractionSummary(_ extraction: Extraction) -> String {
+        var parts: [String] = []
+        if let dose = extraction.doseIn {
+            parts.append(String(format: "%.1fg", dose))
+        }
+        if let yield = extraction.yieldOut {
+            parts.append(String(format: "%.1fg", yield))
+        }
+        let recipe = parts.joined(separator: " → ")
+
+        if let time = extraction.timeSeconds {
+            let timeStr = String(format: "%.0fs", time)
+            return recipe.isEmpty ? timeStr : "\(recipe) · \(timeStr)"
+        }
+        return recipe.isEmpty ? extraction.grindSetting : recipe
     }
 
     private func daysSince(_ date: Date) -> Int {
