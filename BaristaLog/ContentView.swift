@@ -311,6 +311,9 @@ enum PreviewContainer {
             name: "Ethiopia Yirgacheffe",
             roaster: "Square Mile",
             origin: "Ethiopia",
+            roastDate: .now.addingTimeInterval(-12 * 86400),
+            openedDate: .now.addingTimeInterval(-5 * 86400),
+            notes: "Bright and complex, best at 1:2 ratio with light preinfusion.",
             process: "Washed",
             roastLevel: "Light",
             varietal: "Heirloom",
@@ -321,6 +324,9 @@ enum PreviewContainer {
             name: "Colombia Huila",
             roaster: "Onyx Coffee",
             origin: "Colombia",
+            roastDate: .now.addingTimeInterval(-20 * 86400),
+            openedDate: .now.addingTimeInterval(-10 * 86400),
+            notes: "Forgiving bean, works well across a wide grind range.",
             process: "Natural",
             roastLevel: "Medium",
             varietal: "Caturra",
@@ -331,6 +337,8 @@ enum PreviewContainer {
             name: "Guatemala Antigua",
             roaster: "Counter Culture",
             origin: "Guatemala",
+            roastDate: .now.addingTimeInterval(-8 * 86400),
+            notes: "Rich body, great for milk drinks.",
             process: "Honey",
             roastLevel: "Medium-Dark",
             varietal: "Bourbon",
@@ -339,13 +347,44 @@ enum PreviewContainer {
         )
 
         // Grinders
-        let grinder1 = Grinder(name: "Niche Zero", brand: "Niche", adjustmentNotes: "0-50 stepless")
-        let grinder2 = Grinder(name: "Comandante C40", brand: "Comandante", adjustmentNotes: "0-50 clicks")
+        let grinder1 = Grinder(
+            name: "Niche Zero",
+            brand: "Niche",
+            burrType: "Conical",
+            burrSize: "63mm",
+            adjustmentNotes: "0-50 stepless",
+            notes: "Single dose, zero retention. Great for switching between beans."
+        )
+        let grinder2 = Grinder(
+            name: "Comandante C40",
+            brand: "Comandante",
+            burrType: "Conical",
+            burrSize: "39mm",
+            adjustmentNotes: "0-50 clicks",
+            notes: "Hand grinder, best for pour over and travel."
+        )
 
         // Brewers
-        let brewer1 = Brewer(name: "Linea Mini", brand: "La Marzocco", brewType: "Espresso")
-        let brewer2 = Brewer(name: "V60 01", brand: "Hario", brewType: "Pour Over")
-        let brewer3 = Brewer(name: "AeroPress", brand: "AeroPress", brewType: "Immersion")
+        let brewer1 = Brewer(
+            name: "Linea Mini",
+            brand: "La Marzocco",
+            brewType: "Espresso",
+            portafilterSize: "58mm",
+            basketSize: "18g",
+            notes: "Dual boiler, PID temperature control. Warm up 25 min."
+        )
+        let brewer2 = Brewer(
+            name: "V60 01",
+            brand: "Hario",
+            brewType: "Pour Over",
+            notes: "Use Cafec Abaca filters for best results."
+        )
+        let brewer3 = Brewer(
+            name: "AeroPress",
+            brand: "AeroPress",
+            brewType: "Immersion",
+            notes: "Inverted method preferred. Metal filter for more body."
+        )
 
         // Extractions
         let extraction1 = Extraction(
