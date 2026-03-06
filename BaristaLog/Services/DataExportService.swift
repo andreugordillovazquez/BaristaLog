@@ -14,7 +14,7 @@ struct DataExportService {
         let descriptor = FetchDescriptor<Extraction>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         let extractions = try context.fetch(descriptor)
 
-        var csv = "Date,Bean,Roaster,Grinder,Brewer,Grind Setting,Dose (g),Yield (g),Time (s),Rating,Notes\n"
+        var csv = "Date,Bean,Roaster,Grinder,Brewer,Grind Setting,Dose (g),Yield (g),Time (s),Water Temp (°C),Prep Method,Rating,Notes\n"
 
         let dateFormatter = ISO8601DateFormatter()
 
@@ -29,6 +29,8 @@ struct DataExportService {
                 e.doseIn.map { String($0) } ?? "",
                 e.yieldOut.map { String($0) } ?? "",
                 e.timeSeconds.map { String($0) } ?? "",
+                e.waterTemperature.map { String($0) } ?? "",
+                csvEscape(e.prepMethod),
                 e.rating.map { String($0) } ?? "",
                 csvEscape(e.notes)
             ]
@@ -59,7 +61,12 @@ struct DataExportService {
                     origin: bean.origin,
                     roastDate: bean.roastDate.map { dateFormatter.string(from: $0) },
                     openedDate: bean.openedDate.map { dateFormatter.string(from: $0) },
-                    notes: bean.notes
+                    notes: bean.notes,
+                    process: bean.process,
+                    roastLevel: bean.roastLevel,
+                    varietal: bean.varietal,
+                    altitude: bean.altitude,
+                    flavorTags: bean.flavorTags
                 )
             },
             grinders: grinders.map { grinder in
@@ -92,6 +99,8 @@ struct DataExportService {
                     doseIn: e.doseIn,
                     yieldOut: e.yieldOut,
                     timeSeconds: e.timeSeconds,
+                    waterTemperature: e.waterTemperature,
+                    prepMethod: e.prepMethod,
                     rating: e.rating,
                     notes: e.notes
                 )
@@ -135,6 +144,11 @@ private struct ExportBean: Encodable {
     let roastDate: String?
     let openedDate: String?
     let notes: String?
+    let process: String?
+    let roastLevel: String?
+    let varietal: String?
+    let altitude: String?
+    let flavorTags: [String]?
 }
 
 private struct ExportGrinder: Encodable {
@@ -164,6 +178,8 @@ private struct ExportExtraction: Encodable {
     let doseIn: Double?
     let yieldOut: Double?
     let timeSeconds: Double?
+    let waterTemperature: Double?
+    let prepMethod: String?
     let rating: Int?
     let notes: String?
 }

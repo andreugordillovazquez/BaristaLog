@@ -132,6 +132,12 @@ struct SettingsView: View {
                 // MARK: - Debug
                 Section("Debug") {
                     Toggle("Show Onboarding", isOn: $debugShowOnboarding)
+
+                    Button {
+                        PreviewContainer.insertSampleData(into: modelContext)
+                    } label: {
+                        Label("Add Sample Data", systemImage: "sparkles")
+                    }
                 }
 
                 // MARK: - About

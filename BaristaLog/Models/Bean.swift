@@ -32,7 +32,22 @@ final class Bean {
     
     /// User notes about the beans (tasting notes, brewing recommendations, etc.)
     var notes: String?
-    
+
+    /// Processing method (e.g., Washed, Natural, Honey, Anaerobic)
+    var process: String?
+
+    /// Roast level (e.g., Light, Medium, Medium-Dark, Dark)
+    var roastLevel: String?
+
+    /// Coffee varietal (e.g., SL28, Gesha, Caturra)
+    var varietal: String?
+
+    /// Growing altitude (e.g., "1800-2000 masl")
+    var altitude: String?
+
+    /// Flavor profile tags stored as a JSON array by SwiftData
+    var flavorTags: [String]?
+
     /// Image of the coffee bag or beans
     /// Stored externally to avoid database bloat with large binary data
     @Attribute(.externalStorage) var imageData: Data?
@@ -63,7 +78,12 @@ final class Bean {
         roastDate: Date? = nil,
         openedDate: Date? = nil,
         notes: String? = nil,
-        imageData: Data? = nil
+        imageData: Data? = nil,
+        process: String? = nil,
+        roastLevel: String? = nil,
+        varietal: String? = nil,
+        altitude: String? = nil,
+        flavorTags: [String]? = nil
     ) {
         self.name = name
         self.roaster = roaster
@@ -72,5 +92,10 @@ final class Bean {
         self.openedDate = openedDate
         self.notes = notes
         self.imageData = imageData
+        self.process = process
+        self.roastLevel = roastLevel
+        self.varietal = varietal
+        self.altitude = altitude
+        self.flavorTags = flavorTags
     }
 }

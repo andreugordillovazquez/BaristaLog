@@ -307,9 +307,36 @@ enum PreviewContainer {
 
     static func insertSampleData(into context: ModelContext) {
         // Beans
-        let bean1 = Bean(name: "Ethiopia Yirgacheffe", roaster: "Square Mile", origin: "Ethiopia")
-        let bean2 = Bean(name: "Colombia Huila", roaster: "Onyx Coffee", origin: "Colombia")
-        let bean3 = Bean(name: "Guatemala Antigua", roaster: "Counter Culture", origin: "Guatemala")
+        let bean1 = Bean(
+            name: "Ethiopia Yirgacheffe",
+            roaster: "Square Mile",
+            origin: "Ethiopia",
+            process: "Washed",
+            roastLevel: "Light",
+            varietal: "Heirloom",
+            altitude: "1800-2200 masl",
+            flavorTags: ["Floral", "Citrus", "Berry"]
+        )
+        let bean2 = Bean(
+            name: "Colombia Huila",
+            roaster: "Onyx Coffee",
+            origin: "Colombia",
+            process: "Natural",
+            roastLevel: "Medium",
+            varietal: "Caturra",
+            altitude: "1600-1900 masl",
+            flavorTags: ["Chocolate", "Caramel", "Nutty"]
+        )
+        let bean3 = Bean(
+            name: "Guatemala Antigua",
+            roaster: "Counter Culture",
+            origin: "Guatemala",
+            process: "Honey",
+            roastLevel: "Medium-Dark",
+            varietal: "Bourbon",
+            altitude: "1500-1700 masl",
+            flavorTags: ["Chocolate", "Sweet", "Spicy"]
+        )
 
         // Grinders
         let grinder1 = Grinder(name: "Niche Zero", brand: "Niche", adjustmentNotes: "0-50 stepless")
@@ -328,6 +355,8 @@ enum PreviewContainer {
             yieldOut: 36.0,
             timeSeconds: 28.0,
             rating: 5,
+            waterTemperature: 93.5,
+            prepMethod: "WDT",
             bean: bean1,
             grinder: grinder1,
             brewer: brewer1
@@ -340,6 +369,7 @@ enum PreviewContainer {
             yieldOut: 250.0,
             timeSeconds: 180.0,
             rating: 4,
+            waterTemperature: 96.0,
             bean: bean2,
             grinder: grinder2,
             brewer: brewer2
@@ -352,6 +382,8 @@ enum PreviewContainer {
             yieldOut: 35.0,
             timeSeconds: 30.0,
             rating: 3,
+            waterTemperature: 92.0,
+            prepMethod: "Distribution Tool",
             bean: bean3,
             grinder: grinder1,
             brewer: brewer1
@@ -364,6 +396,7 @@ enum PreviewContainer {
             yieldOut: 220.0,
             timeSeconds: 120.0,
             notes: "Inverted method, 2 min steep",
+            waterTemperature: 95.0,
             bean: bean1,
             grinder: grinder2,
             brewer: brewer3
@@ -376,7 +409,16 @@ enum PreviewContainer {
     }
 
     static var sampleExtraction: Extraction {
-        let bean = Bean(name: "Ethiopia Yirgacheffe", roaster: "Square Mile", origin: "Ethiopia")
+        let bean = Bean(
+            name: "Ethiopia Yirgacheffe",
+            roaster: "Square Mile",
+            origin: "Ethiopia",
+            process: "Washed",
+            roastLevel: "Light",
+            varietal: "Heirloom",
+            altitude: "1800-2200 masl",
+            flavorTags: ["Floral", "Citrus", "Berry"]
+        )
         let grinder = Grinder(name: "Niche Zero", brand: "Niche", adjustmentNotes: "0-50 stepless")
         let brewer = Brewer(name: "Linea Mini", brand: "La Marzocco", brewType: "Espresso")
 
@@ -387,6 +429,8 @@ enum PreviewContainer {
             timeSeconds: 28.0,
             rating: 4,
             notes: "Sweet, fruity, slight citrus acidity. Could go finer next time.",
+            waterTemperature: 93.5,
+            prepMethod: "WDT",
             bean: bean,
             grinder: grinder,
             brewer: brewer
@@ -400,7 +444,12 @@ enum PreviewContainer {
             origin: "Ethiopia",
             roastDate: Calendar.current.date(byAdding: .day, value: -14, to: .now),
             openedDate: Calendar.current.date(byAdding: .day, value: -7, to: .now),
-            notes: "Floral, bergamot, bright citrus acidity. Best 14-28 days off roast."
+            notes: "Floral, bergamot, bright citrus acidity. Best 14-28 days off roast.",
+            process: "Washed",
+            roastLevel: "Light",
+            varietal: "Heirloom",
+            altitude: "1800-2200 masl",
+            flavorTags: ["Floral", "Citrus", "Berry", "Sweet"]
         )
     }
 
