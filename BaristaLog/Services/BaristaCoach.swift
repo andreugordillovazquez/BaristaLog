@@ -49,6 +49,8 @@ final class BaristaCoach {
         adjust time) or say "Looks dialed in, keep it up" if the numbers are on target.
         - If dose, yield, or time are missing, base your feedback only on the data provided and note \
         what recording those values would help with.
+        - If bean process or roast level are provided, factor them into your assessment (e.g. lighter roasts \
+        typically need finer grinds and higher temperatures).
         - Do NOT discuss bean origins, flavor theory, or brewing history. Focus only on the shot data.
         - Keep the tone friendly and concise.
         """
@@ -86,6 +88,26 @@ final class BaristaCoach {
 
         if let time = extraction.timeSeconds {
             lines.append("Time: \(Int(time)) s")
+        }
+
+        if let temp = extraction.waterTemperature {
+            lines.append("Water temperature: \(String(format: "%.0f", temp)) °C")
+        }
+
+        if let prepMethod = extraction.prepMethod {
+            lines.append("Prep method: \(prepMethod)")
+        }
+
+        if let process = extraction.bean?.process {
+            lines.append("Bean process: \(process)")
+        }
+
+        if let roastLevel = extraction.bean?.roastLevel {
+            lines.append("Roast level: \(roastLevel)")
+        }
+
+        if let varietal = extraction.bean?.varietal {
+            lines.append("Varietal: \(varietal)")
         }
 
         if let rating = extraction.rating {

@@ -35,6 +35,41 @@ struct BeanDetailView: View {
                 }
             }
 
+            // MARK: - Details
+            if bean.process != nil || bean.roastLevel != nil || bean.varietal != nil || bean.altitude != nil {
+                Section("Details") {
+                    if let process = bean.process {
+                        LabeledContent("Process", value: process)
+                    }
+                    if let roastLevel = bean.roastLevel {
+                        LabeledContent("Roast Level", value: roastLevel)
+                    }
+                    if let varietal = bean.varietal {
+                        LabeledContent("Varietal", value: varietal)
+                    }
+                    if let altitude = bean.altitude {
+                        LabeledContent("Altitude", value: "\(altitude) masl")
+                    }
+                }
+            }
+
+            // MARK: - Flavor Profile
+            if let tags = bean.flavorTags, !tags.isEmpty {
+                Section("Flavor Profile") {
+                    FlowLayout(spacing: 8) {
+                        ForEach(tags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.brandBrown.opacity(0.15))
+                                .foregroundStyle(Color.brandBrown)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+
             // MARK: - Dates
             if bean.roastDate != nil || bean.openedDate != nil {
                 Section("Dates") {

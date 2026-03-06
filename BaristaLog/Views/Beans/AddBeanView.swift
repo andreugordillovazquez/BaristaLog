@@ -20,12 +20,24 @@ struct AddBeanView: View {
     @State private var openedDate: Date?
     @State private var notes: String = ""
 
+    @State private var process: String = ""
+    @State private var roastLevel: String = ""
+    @State private var varietal: String = ""
+    @State private var altitude: String = ""
+    @State private var selectedFlavorTags: Set<String> = []
+
     @State private var showRoastDatePicker = false
     @State private var showOpenedDatePicker = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var photoData: Data?
 
     @FocusState private var isNameFocused: Bool
+
+    private static let availableFlavorTags = [
+        "Chocolate", "Fruity", "Floral", "Nutty", "Citrus",
+        "Berry", "Caramel", "Spicy", "Earthy", "Herbal",
+        "Sweet", "Winey", "Tropical", "Smoky", "Honey"
+    ]
 
     private var isEditing: Bool { beanToEdit != nil }
 
@@ -60,6 +72,60 @@ struct AddBeanView: View {
                         Button("Remove Photo", role: .destructive) {
                             selectedPhotoItem = nil
                             photoData = nil
+                        }
+                    }
+                }
+
+                // MARK: - Details
+                Section("Details") {
+                    Picker("Process", selection: $process) {
+                        Text("None").tag("")
+                        ForEach(["Washed", "Natural", "Honey", "Anaerobic", "Other"], id: \.self) { p in
+                            Text(p).tag(p)
+                        }
+                    }
+
+                    Picker("Roast Level", selection: $roastLevel) {
+                        Text("None").tag("")
+                        ForEach(["Light", "Medium", "Medium-Dark", "Dark"], id: \.self) { r in
+                            Text(r).tag(r)
+                        }
+                    }
+
+                    TextField("Varietal", text: $varietal)
+                    HStack {
+                        TextField("Altitude (e.g. 1800-2000)", text: $altitude)
+                        if !altitude.isEmpty {
+                            Text("masl")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                // MARK: - Flavor Tags
+                Section("Flavor Profile") {
+                    FlowLayout(spacing: 8) {
+                        ForEach(Self.availableFlavorTags, id: \.self) { tag in
+                            Button {
+                                if selectedFlavorTags.contains(tag) {
+                                    selectedFlavorTags.remove(tag)
+                                } else {
+                                    selectedFlavorTags.insert(tag)
+                                }
+                            } label: {
+                                Text(tag)
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        selectedFlavorTags.contains(tag)
+                                            ? Color.brandBrown
+                                            : Color.secondary.opacity(0.15)
+                                    )
+                                    .foregroundStyle(selectedFlavorTags.contains(tag) ? .white : .primary)
+                                    .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -128,6 +194,11 @@ struct AddBeanView: View {
                     openedDate = bean.openedDate
                     notes = bean.notes ?? ""
                     photoData = bean.imageData
+                    process = bean.process ?? ""
+                    roastLevel = bean.roastLevel ?? ""
+                    varietal = bean.varietal ?? ""
+                    altitude = bean.altitude ?? ""
+                    selectedFlavorTags = Set(bean.flavorTags ?? [])
                     showRoastDatePicker = bean.roastDate != nil
                     showOpenedDatePicker = bean.openedDate != nil
                 }
@@ -140,6 +211,8 @@ struct AddBeanView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else { return }
 
+        let flavorTagsArray = selectedFlavorTags.isEmpty ? nil : Array(selectedFlavorTags).sorted()
+
         if let bean = beanToEdit {
             // Update existing
             bean.name = trimmedName
@@ -149,6 +222,11 @@ struct AddBeanView: View {
             bean.openedDate = showOpenedDatePicker ? openedDate : nil
             bean.notes = notes.isEmpty ? nil : notes
             bean.imageData = photoData
+            bean.process = process.isEmpty ? nil : process
+            bean.roastLevel = roastLevel.isEmpty ? nil : roastLevel
+            bean.varietal = varietal.isEmpty ? nil : varietal
+            bean.altitude = altitude.isEmpty ? nil : altitude
+            bean.flavorTags = flavorTagsArray
         } else {
             // Create new
             let bean = Bean(
@@ -158,7 +236,12 @@ struct AddBeanView: View {
                 roastDate: showRoastDatePicker ? roastDate : nil,
                 openedDate: showOpenedDatePicker ? openedDate : nil,
                 notes: notes.isEmpty ? nil : notes,
-                imageData: photoData
+                imageData: photoData,
+                process: process.isEmpty ? nil : process,
+                roastLevel: roastLevel.isEmpty ? nil : roastLevel,
+                varietal: varietal.isEmpty ? nil : varietal,
+                altitude: altitude.isEmpty ? nil : altitude,
+                flavorTags: flavorTagsArray
             )
             modelContext.insert(bean)
         }

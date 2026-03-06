@@ -40,6 +40,12 @@ final class Extraction {
     /// User notes about the shot (taste profile, adjustments needed, observations, etc.)
     var notes: String?
 
+    /// Water temperature in Celsius
+    var waterTemperature: Double?
+
+    /// Puck preparation method (e.g., WDT, Distribution Tool, Palm Tap)
+    var prepMethod: String?
+
     // MARK: - Relationships
     
     /// The coffee bean used for this extraction
@@ -76,6 +82,8 @@ final class Extraction {
         timeSeconds: Double? = nil,
         rating: Int? = nil,
         notes: String? = nil,
+        waterTemperature: Double? = nil,
+        prepMethod: String? = nil,
         bean: Bean,
         grinder: Grinder,
         brewer: Brewer
@@ -87,6 +95,8 @@ final class Extraction {
         self.timeSeconds = timeSeconds
         self.rating = rating
         self.notes = notes
+        self.waterTemperature = waterTemperature
+        self.prepMethod = prepMethod
         self.bean = bean
         self.grinder = grinder
         self.brewer = brewer

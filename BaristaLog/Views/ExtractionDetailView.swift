@@ -48,6 +48,9 @@ struct ExtractionDetailView: View {
                 if let brewType = extraction.brewer?.brewType {
                     LabeledContent("Brew Type", value: brewType)
                 }
+                if let prepMethod = extraction.prepMethod {
+                    LabeledContent("Prep Method", value: prepMethod)
+                }
             }
 
             // MARK: - Grind
@@ -141,6 +144,12 @@ struct ExtractionDetailView: View {
                 }
                 if let time = extraction.timeSeconds {
                     metricCell(value: formatTime(time), unit: "", label: "Time")
+                }
+                if let temp = extraction.waterTemperature {
+                    if extraction.doseIn != nil || extraction.yieldOut != nil || extraction.timeSeconds != nil {
+                        Divider().frame(height: 36)
+                    }
+                    metricCell(value: String(format: "%.0f", temp), unit: "°C", label: "Temp")
                 }
             }
         }

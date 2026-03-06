@@ -32,6 +32,8 @@ struct AddExtractionView: View {
     @State private var timeSeconds: Double?
     @State private var rating: Int?
     @State private var notes: String = ""
+    @State private var waterTemperature: Double?
+    @State private var prepMethod: String = ""
 
     @FocusState private var isGrindSettingFocused: Bool
 
@@ -107,6 +109,28 @@ struct AddExtractionView: View {
                     }
                 }
 
+                // MARK: - Water Temperature
+                Section("Water Temperature") {
+                    HStack {
+                        Text("Temperature")
+                        Spacer()
+                        TextField("°C", value: $waterTemperature, format: .number)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                }
+
+                // MARK: - Prep Method
+                Section("Prep") {
+                    Picker("Prep Method", selection: $prepMethod) {
+                        Text("None").tag("")
+                        ForEach(["WDT", "Distribution Tool", "Palm Tap", "Stockfleth", "Other"], id: \.self) { method in
+                            Text(method).tag(method)
+                        }
+                    }
+                }
+
                 // MARK: - Rating
                 Section("Rating") {
                     RatingPicker(rating: $rating)
@@ -145,6 +169,8 @@ struct AddExtractionView: View {
                     timeSeconds = extraction.timeSeconds
                     rating = extraction.rating
                     notes = extraction.notes ?? ""
+                    waterTemperature = extraction.waterTemperature
+                    prepMethod = extraction.prepMethod ?? ""
                 } else if let template = basedOn {
                     // From Recent - copy equipment and settings, not notes/rating
                     selectedBean = template.bean
@@ -152,6 +178,8 @@ struct AddExtractionView: View {
                     selectedBrewer = template.brewer
                     grindSetting = template.grindSetting
                     doseIn = template.doseIn
+                    waterTemperature = template.waterTemperature
+                    prepMethod = template.prepMethod ?? ""
                     // Don't copy yield, time, rating, or notes - those are specific to each shot
                 } else {
                     if selectedGrinder == nil, let id = UUID(uuidString: defaultGrinderID) {
@@ -182,6 +210,8 @@ struct AddExtractionView: View {
             extraction.timeSeconds = timeSeconds
             extraction.rating = rating
             extraction.notes = notes.isEmpty ? nil : notes
+            extraction.waterTemperature = waterTemperature
+            extraction.prepMethod = prepMethod.isEmpty ? nil : prepMethod
         } else {
             // Create new
             let extraction = Extraction(
@@ -191,6 +221,8 @@ struct AddExtractionView: View {
                 timeSeconds: timeSeconds,
                 rating: rating,
                 notes: notes.isEmpty ? nil : notes,
+                waterTemperature: waterTemperature,
+                prepMethod: prepMethod.isEmpty ? nil : prepMethod,
                 bean: bean,
                 grinder: grinder,
                 brewer: brewer
