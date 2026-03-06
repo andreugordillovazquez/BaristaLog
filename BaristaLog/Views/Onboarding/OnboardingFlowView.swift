@@ -46,10 +46,13 @@ struct OnboardingFlowView: View {
                     }
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 20, height: 20)
+                        .font(.title3.weight(.semibold))
+                        .padding(10)
                 }
                 .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .tint(.primary)
+                .accessibilityLabel("Back")
                 .opacity(stepIndex > 0 ? 1 : 0)
                 .animation(.easeInOut, value: stepIndex)
                 .disabled(stepIndex == 0)
@@ -128,6 +131,7 @@ struct OnboardingFlowView: View {
                 .scaledToFit()
                 .frame(width: 75, height: 75)
                 .clipShape(RoundedRectangle(cornerRadius: 22.5, style: .continuous))
+                .accessibilityHidden(true)
 
             // Title
             VStack(alignment: .leading, spacing: 12) {
@@ -601,6 +605,7 @@ struct OnboardingFlowView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 56, weight: .medium))
                 .foregroundStyle(Color.brandBrown)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 12) {
                 Text("You're all set")
@@ -681,6 +686,7 @@ private struct OnboardingFeatureRow: View {
                 .font(.system(size: 24, weight: .medium))
                 .foregroundStyle(Color.brandBrown)
                 .frame(width: 32)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
@@ -710,6 +716,8 @@ private struct PageIndicator: View {
             }
         }
         .padding(.top, 2)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Step \(index + 1) of \(count)")
     }
 }
 

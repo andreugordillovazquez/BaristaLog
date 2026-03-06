@@ -296,6 +296,7 @@ struct LibraryEmptyStateView: View {
                     .font(.system(size: 36, weight: .medium))
                     .foregroundStyle(Color.brandBrown)
             }
+            .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("Set Up Your Library")

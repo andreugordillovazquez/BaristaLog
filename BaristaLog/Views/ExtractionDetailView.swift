@@ -68,6 +68,8 @@ struct ExtractionDetailView: View {
                         }
                     }
                     .font(.title3)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(rating) out of 5 stars")
                 }
             }
 
@@ -93,10 +95,8 @@ struct ExtractionDetailView: View {
                 }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button {
+                Button("Edit") {
                     showingEditSheet = true
-                } label: {
-                    Label("Edit", systemImage: "pencil")
                 }
             }
         }

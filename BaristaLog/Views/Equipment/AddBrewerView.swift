@@ -49,11 +49,13 @@ struct AddBrewerView: View {
                                 .scaledToFill()
                                 .frame(maxHeight: 200)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .accessibilityLabel("Brewer photo")
                         } else {
                             Label("Add Photo", systemImage: "photo.on.rectangle.angled")
                                 .foregroundStyle(Color.brandBrown)
                         }
                     }
+                    .accessibilityHint(photoData != nil ? "Double tap to change photo" : "Double tap to add a photo")
                     if photoData != nil {
                         Button("Remove Photo", role: .destructive) {
                             selectedPhotoItem = nil

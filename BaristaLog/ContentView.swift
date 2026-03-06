@@ -159,6 +159,8 @@ struct ExtractionRowView: View {
                                 .foregroundStyle(star <= rating ? .yellow : .secondary)
                         }
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(rating) out of 5 stars")
                 }
             }
 
@@ -236,6 +238,7 @@ struct ExtractionEmptyStateView: View {
                     .font(.system(size: 36, weight: .medium))
                     .foregroundStyle(Color.brandBrown)
             }
+            .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("No Extractions Yet")
