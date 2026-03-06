@@ -207,12 +207,20 @@ struct AddExtractionView: View {
 struct RatingPicker: View {
     @Binding var rating: Int?
 
+    private var ratingLabel: String {
+        if let rating {
+            "\(rating) out of 5 stars"
+        } else {
+            "No rating"
+        }
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             ForEach(1...5, id: \.self) { star in
                 Button {
                     if rating == star {
-                        rating = nil // Tap again to clear
+                        rating = nil
                     } else {
                         rating = star
                     }
@@ -222,6 +230,8 @@ struct RatingPicker: View {
                         .foregroundStyle((rating ?? 0) >= star ? .yellow : .secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
+                .accessibilityAddTraits(rating == star ? .isSelected : [])
             }
             Spacer()
             if rating != nil {
@@ -230,8 +240,12 @@ struct RatingPicker: View {
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("Clear rating")
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Rating")
+        .accessibilityValue(ratingLabel)
     }
 }
 
