@@ -187,10 +187,10 @@ struct BeanRowView: View {
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray6))
+                        .fill(Color.brandBrown.opacity(0.12))
                         .frame(width: 50, height: 50)
                     Image(systemName: "leaf.fill")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.brandBrown)
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -223,10 +223,10 @@ struct GrinderRowView: View {
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray6))
+                        .fill(Color.brandBrown.opacity(0.12))
                         .frame(width: 50, height: 50)
                     Image(systemName: "gearshape.fill")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.brandBrown)
                 }
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -259,10 +259,10 @@ struct BrewerRowView: View {
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray6))
+                        .fill(Color.brandBrown.opacity(0.12))
                         .frame(width: 50, height: 50)
                     Image(systemName: "cup.and.saucer.fill")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.brandBrown)
                 }
             }
             VStack(alignment: .leading, spacing: 2) {

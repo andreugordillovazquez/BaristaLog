@@ -131,7 +131,13 @@ struct AddBeanView: View {
                 }
 
                 Section("Dates") {
-                    Toggle("Roast Date", isOn: $showRoastDatePicker)
+                    Toggle("Roast Date", isOn: Binding(
+                        get: { showRoastDatePicker },
+                        set: { newValue in
+                            showRoastDatePicker = newValue
+                            if newValue && roastDate == nil { roastDate = .now }
+                        }
+                    ))
                     if showRoastDatePicker {
                         DatePicker(
                             "Roasted on",
@@ -143,7 +149,13 @@ struct AddBeanView: View {
                         )
                     }
 
-                    Toggle("Opened Date", isOn: $showOpenedDatePicker)
+                    Toggle("Opened Date", isOn: Binding(
+                        get: { showOpenedDatePicker },
+                        set: { newValue in
+                            showOpenedDatePicker = newValue
+                            if newValue && openedDate == nil { openedDate = .now }
+                        }
+                    ))
                     if showOpenedDatePicker {
                         DatePicker(
                             "Opened on",

@@ -314,7 +314,7 @@ enum PreviewContainer {
             process: "Washed",
             roastLevel: "Light",
             varietal: "Heirloom",
-            altitude: "1800-2200 masl",
+            altitude: "1800-2200",
             flavorTags: ["Floral", "Citrus", "Berry"]
         )
         let bean2 = Bean(
@@ -324,7 +324,7 @@ enum PreviewContainer {
             process: "Natural",
             roastLevel: "Medium",
             varietal: "Caturra",
-            altitude: "1600-1900 masl",
+            altitude: "1600-1900",
             flavorTags: ["Chocolate", "Caramel", "Nutty"]
         )
         let bean3 = Bean(
@@ -334,7 +334,7 @@ enum PreviewContainer {
             process: "Honey",
             roastLevel: "Medium-Dark",
             varietal: "Bourbon",
-            altitude: "1500-1700 masl",
+            altitude: "1500-1700",
             flavorTags: ["Chocolate", "Sweet", "Spicy"]
         )
 
