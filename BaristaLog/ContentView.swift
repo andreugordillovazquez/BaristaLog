@@ -132,7 +132,7 @@ struct ExtractionRowView: View {
 
         var result = dosePart
         if let time = extraction.timeSeconds {
-            let timeStr = formatTime(time)
+            let timeStr = ExtractionFormatter.formatTime(time)
             if !timeStr.isEmpty {
                 result = result.isEmpty ? timeStr : result + " · " + timeStr
             }
@@ -196,14 +196,6 @@ struct ExtractionRowView: View {
         }
     }
 
-    private func formatTime(_ seconds: Double) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        if mins > 0 {
-            return "\(mins)m \(secs)s"
-        }
-        return "\(secs)s"
-    }
 }
 
 // MARK: - Compact Label Style

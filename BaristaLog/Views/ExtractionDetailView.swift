@@ -143,7 +143,7 @@ struct ExtractionDetailView: View {
                     Divider().frame(height: 36)
                 }
                 if let time = extraction.timeSeconds {
-                    metricCell(value: formatTime(time), unit: "", label: "Time")
+                    metricCell(value: ExtractionFormatter.formatTime(time), unit: "", label: "Time")
                 }
                 if let temp = extraction.waterTemperature {
                     if extraction.doseIn != nil || extraction.yieldOut != nil || extraction.timeSeconds != nil {
@@ -177,14 +177,6 @@ struct ExtractionDetailView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func formatTime(_ seconds: Double) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        if mins > 0 {
-            return "\(mins)m \(secs)s"
-        }
-        return "\(secs)s"
-    }
 }
 
 #Preview {

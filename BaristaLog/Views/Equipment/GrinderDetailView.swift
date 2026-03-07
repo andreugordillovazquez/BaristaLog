@@ -108,7 +108,7 @@ struct GrinderDetailView: View {
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(extractionSummary(extraction))
+                                    Text(ExtractionFormatter.summary(extraction))
                                         .font(.subheadline)
                                     Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
                                         .font(.caption)
@@ -156,31 +156,6 @@ struct GrinderDetailView: View {
         (grinder.notes != nil && !grinder.notes!.isEmpty)
     }
 
-    private func extractionSummary(_ extraction: Extraction) -> String {
-        var parts: [String] = []
-        if let dose = extraction.doseIn {
-            parts.append(String(format: "%.1fg", dose))
-        }
-        if let yield = extraction.yieldOut {
-            parts.append(String(format: "%.1fg", yield))
-        }
-        let recipe = parts.joined(separator: " → ")
-
-        if let time = extraction.timeSeconds {
-            let timeStr = formatTime(time)
-            return recipe.isEmpty ? timeStr : "\(recipe) · \(timeStr)"
-        }
-        return recipe.isEmpty ? extraction.grindSetting : recipe
-    }
-
-    private func formatTime(_ seconds: Double) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        if mins > 0 {
-            return "\(mins)m \(secs)s"
-        }
-        return "\(secs)s"
-    }
 }
 
 #Preview {
