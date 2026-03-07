@@ -10,7 +10,8 @@ struct AddExtractionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @Query(sort: \Bean.name) private var beans: [Bean]
+    @Query(filter: #Predicate<Bean> { $0.finishedDate == nil }, sort: \Bean.name)
+    private var beans: [Bean]
     @Query(sort: \Grinder.name) private var grinders: [Grinder]
     @Query(sort: \Brewer.name) private var brewers: [Brewer]
 

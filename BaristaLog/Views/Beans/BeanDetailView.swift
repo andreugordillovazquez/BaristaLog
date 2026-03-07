@@ -9,6 +9,10 @@ import SwiftData
 struct BeanDetailView: View {
     @Bindable var bean: Bean
     @State private var showingEditSheet = false
+    @State private var showingNewBagSheet = false
+    @State private var showingFinishConfirmation = false
+    @State private var startNewBagAfterFinish = false
+    @State private var createdBean: Bean?
 
     var body: some View {
         List {
@@ -36,9 +40,20 @@ struct BeanDetailView: View {
 
                     // Name, subtitle, freshness, and flavor tags
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(bean.name)
-                            .font(.title)
-                            .fontWeight(.bold)
+                        HStack(spacing: 8) {
+                            Text(bean.name)
+                                .font(.title)
+                                .fontWeight(.bold)
+                            if bean.isFinished {
+                                Text("Finished")
+                                    .font(.caption)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.brandBrown.opacity(0.15))
+                                    .foregroundStyle(Color.brandBrown)
+                                    .clipShape(Capsule())
+                            }
+                        }
 
                         if bean.roaster != nil || bean.origin != nil {
                             Text([bean.roaster, bean.origin].compactMap { $0 }.joined(separator: " · "))
@@ -97,6 +112,9 @@ struct BeanDetailView: View {
                     }
                     if let openedDate = bean.openedDate {
                         LabeledContent("Opened", value: openedDate, format: .dateTime.day().month().year())
+                    }
+                    if let finishedDate = bean.finishedDate {
+                        LabeledContent("Finished", value: finishedDate, format: .dateTime.day().month().year())
                     }
                     if let notes = bean.notes, !notes.isEmpty {
                         Text(notes)
@@ -168,13 +186,67 @@ struct BeanDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Edit") {
-                    showingEditSheet = true
+                Menu {
+                    Button {
+                        showingEditSheet = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    if bean.isFinished {
+                        Button {
+                            showingNewBagSheet = true
+                        } label: {
+                            Label("New Bag", systemImage: "shippingbox")
+                        }
+                        Button {
+                            bean.finishedDate = nil
+                        } label: {
+                            Label("Mark as Active", systemImage: "arrow.uturn.backward")
+                        }
+                    } else {
+                        Button {
+                            startNewBagAfterFinish = true
+                            showingFinishConfirmation = true
+                        } label: {
+                            Label("New Bag", systemImage: "shippingbox")
+                        }
+                        Button {
+                            startNewBagAfterFinish = false
+                            showingFinishConfirmation = true
+                        } label: {
+                            Label("Finish Bag", systemImage: "checkmark.circle")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
             }
         }
+        .confirmationDialog(
+            "Finish this bag?",
+            isPresented: $showingFinishConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Finish Bag") {
+                bean.finishedDate = .now
+                if startNewBagAfterFinish {
+                    showingNewBagSheet = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This bag of \(bean.name) will be marked as finished.")
+        }
         .sheet(isPresented: $showingEditSheet) {
             AddBeanView(beanToEdit: bean)
+        }
+        .sheet(isPresented: $showingNewBagSheet) {
+            AddBeanView(basedOnBean: bean) { newBean in
+                createdBean = newBean
+            }
+        }
+        .navigationDestination(item: $createdBean) { newBean in
+            BeanDetailView(bean: newBean)
         }
     }
 
@@ -185,6 +257,7 @@ struct BeanDetailView: View {
         bean.altitude != nil ||
         bean.roastDate != nil ||
         bean.openedDate != nil ||
+        bean.finishedDate != nil ||
         (bean.notes != nil && !bean.notes!.isEmpty)
     }
 
