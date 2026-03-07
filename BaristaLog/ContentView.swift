@@ -9,9 +9,25 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Extraction.date, order: .reverse) private var extractions: [Extraction]
+    @Query(filter: #Predicate<Bean> { $0.finishedDate == nil }) private var activeBeans: [Bean]
+    @Query private var grinders: [Grinder]
+    @Query private var brewers: [Brewer]
 
+    @Binding var selectedTab: AppTab
     @State private var showingAddExtraction = false
     @State private var showingAddFromRecent = false
+
+    private var canCreateExtraction: Bool {
+        !activeBeans.isEmpty && !grinders.isEmpty && !brewers.isEmpty
+    }
+
+    private var missingEquipment: [String] {
+        var missing: [String] = []
+        if activeBeans.isEmpty { missing.append("bean") }
+        if grinders.isEmpty { missing.append("grinder") }
+        if brewers.isEmpty { missing.append("brewer") }
+        return missing
+    }
 
     private var mostRecentExtraction: Extraction? {
         extractions.first
@@ -30,8 +46,14 @@ struct ContentView: View {
         NavigationStack {
             Group {
                 if extractions.isEmpty {
-                    ExtractionEmptyStateView {
-                        showingAddExtraction = true
+                    if canCreateExtraction {
+                        ExtractionEmptyStateView {
+                            showingAddExtraction = true
+                        }
+                    } else {
+                        SetupNeededView(missingEquipment: missingEquipment) {
+                            selectedTab = .library
+                        }
                     }
                 } else {
                     List {
@@ -60,23 +82,25 @@ struct ContentView: View {
             }
             .navigationTitle("BaristaLog")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button {
-                            showingAddExtraction = true
-                        } label: {
-                            Label("New Extraction", systemImage: "plus")
-                        }
-
-                        if mostRecentExtraction != nil {
+                if canCreateExtraction {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
                             Button {
-                                showingAddFromRecent = true
+                                showingAddExtraction = true
                             } label: {
-                                Label("From Recent", systemImage: "doc.on.doc")
+                                Label("New Extraction", systemImage: "plus")
                             }
+
+                            if mostRecentExtraction != nil {
+                                Button {
+                                    showingAddFromRecent = true
+                                } label: {
+                                    Label("From Recent", systemImage: "doc.on.doc")
+                                }
+                            }
+                        } label: {
+                            Label("Add", systemImage: "plus")
                         }
-                    } label: {
-                        Label("Add", systemImage: "plus")
                     }
                 }
             }
@@ -262,10 +286,136 @@ struct ExtractionEmptyStateView: View {
     }
 }
 
+// MARK: - Setup Needed View
+
+struct SetupNeededView: View {
+    let missingEquipment: [String]
+    let onGoToLibrary: () -> Void
+
+    private var missingText: String {
+        switch missingEquipment.count {
+        case 1:
+            return "Add a \(missingEquipment[0]) to your Library to start logging extractions."
+        case 2:
+            return "Add a \(missingEquipment[0]) and \(missingEquipment[1]) to your Library to start logging."
+        default:
+            return "Add a bean, grinder, and brewer to your Library to start logging."
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            // Skeleton background
+            List {
+                ForEach(["Today", "Yesterday"], id: \.self) { section in
+                    Section {
+                        ForEach(0..<3, id: \.self) { _ in
+                            SkeletonExtractionRow()
+                        }
+                    } header: {
+                        Text("\(section) · 3")
+                            .textCase(nil)
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.visible)
+            .headerProminence(.increased)
+            .scrollDisabled(true)
+            .blur(radius: 4)
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: .black, location: 0),
+                        .init(color: .black, location: 0.7),
+                        .init(color: .clear, location: 1.0)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+
+            // Overlay content
+            VStack(spacing: 0) {
+                Spacer()
+
+                ZStack {
+                    Circle()
+                        .fill(Color.brandBrown.opacity(0.12))
+                        .frame(width: 88, height: 88)
+                    Image(systemName: "books.vertical.fill")
+                        .font(.system(size: 36, weight: .medium))
+                        .foregroundStyle(Color.brandBrown)
+                }
+                .accessibilityHidden(true)
+
+                VStack(spacing: 8) {
+                    Text("Almost There")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text(missingText)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 260)
+                }
+                .padding(.top, 20)
+
+                Button(action: onGoToLibrary) {
+                    Text("Go to Library")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .frame(minWidth: 160)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(Color.brandBrown)
+                .padding(.top, 24)
+
+                Spacer()
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+// MARK: - Skeleton Extraction Row
+
+private struct SkeletonExtractionRow: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(0.2))
+                    .frame(width: 140, height: 16)
+                Spacer()
+                HStack(spacing: 2) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.secondary.opacity(0.2))
+                    }
+                }
+            }
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.secondary.opacity(0.15))
+                .frame(width: 180, height: 14)
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.secondary.opacity(0.1))
+                .frame(width: 220, height: 12)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 // MARK: - Preview
 
 #Preview {
-    ContentView()
+    ContentView(selectedTab: .constant(.extractions))
         .modelContainer(PreviewContainer.shared.container)
 }
 
