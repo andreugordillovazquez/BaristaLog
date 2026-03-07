@@ -447,11 +447,103 @@ enum PreviewContainer {
             brewer: brewer3
         )
 
+        // More extractions for bean1/grinder1/brewer1 to test "See All" (>5)
+        let extraction5 = Extraction(
+            date: .now.addingTimeInterval(-4 * 86400),
+            grindSetting: "14",
+            doseIn: 18.0,
+            yieldOut: 38.0,
+            timeSeconds: 32.0,
+            rating: 4,
+            notes: "Slightly over-extracted, go coarser.",
+            waterTemperature: 93.0,
+            prepMethod: "WDT",
+            bean: bean1,
+            grinder: grinder1,
+            brewer: brewer1
+        )
+
+        let extraction6 = Extraction(
+            date: .now.addingTimeInterval(-5 * 86400),
+            grindSetting: "16",
+            doseIn: 18.0,
+            yieldOut: 34.0,
+            timeSeconds: 26.0,
+            rating: 3,
+            waterTemperature: 94.0,
+            bean: bean1,
+            grinder: grinder1,
+            brewer: brewer1
+        )
+
+        let extraction7 = Extraction(
+            date: .now.addingTimeInterval(-6 * 86400),
+            grindSetting: "15",
+            doseIn: 18.0,
+            yieldOut: 36.0,
+            timeSeconds: 27.0,
+            rating: 5,
+            notes: "Dialed in perfectly. Sweet and balanced.",
+            waterTemperature: 93.5,
+            prepMethod: "WDT",
+            bean: bean1,
+            grinder: grinder1,
+            brewer: brewer1
+        )
+
+        let extraction8 = Extraction(
+            date: .now.addingTimeInterval(-7 * 86400),
+            grindSetting: "13",
+            doseIn: 18.0,
+            yieldOut: 32.0,
+            timeSeconds: 35.0,
+            rating: 2,
+            notes: "Choked. Way too fine.",
+            waterTemperature: 93.5,
+            bean: bean1,
+            grinder: grinder1,
+            brewer: brewer1
+        )
+
+        let extraction9 = Extraction(
+            date: .now.addingTimeInterval(-8 * 86400),
+            grindSetting: "15",
+            doseIn: 17.0,
+            yieldOut: 35.0,
+            timeSeconds: 29.0,
+            rating: 4,
+            waterTemperature: 93.0,
+            prepMethod: "Distribution Tool",
+            bean: bean2,
+            grinder: grinder1,
+            brewer: brewer1
+        )
+
+        let extraction10 = Extraction(
+            date: .now.addingTimeInterval(-9 * 86400),
+            grindSetting: "24",
+            doseIn: 15.0,
+            yieldOut: 240.0,
+            timeSeconds: 195.0,
+            rating: 3,
+            notes: "Longer brew time, richer body.",
+            waterTemperature: 95.0,
+            bean: bean3,
+            grinder: grinder2,
+            brewer: brewer2
+        )
+
         context.insert(bean4)
         context.insert(extraction1)
         context.insert(extraction2)
         context.insert(extraction3)
         context.insert(extraction4)
+        context.insert(extraction5)
+        context.insert(extraction6)
+        context.insert(extraction7)
+        context.insert(extraction8)
+        context.insert(extraction9)
+        context.insert(extraction10)
     }
 
     static var sampleExtraction: Extraction {
