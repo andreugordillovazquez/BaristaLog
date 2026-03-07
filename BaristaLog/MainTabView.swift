@@ -6,21 +6,26 @@
 import SwiftUI
 import SwiftData
 
+enum AppTab: Hashable {
+    case extractions, library, settings
+}
+
 struct MainTabView: View {
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("startGuidedExtraction") private var startGuidedExtraction = false
+    @State private var selectedTab: AppTab = .extractions
 
     var body: some View {
-        TabView {
-            Tab("Extractions", systemImage: "cup.and.saucer") {
-                ContentView()
+        TabView(selection: $selectedTab) {
+            Tab("Extractions", systemImage: "cup.and.saucer", value: .extractions) {
+                ContentView(selectedTab: $selectedTab)
             }
 
-            Tab("Library", systemImage: "books.vertical") {
+            Tab("Library", systemImage: "books.vertical", value: .library) {
                 LibraryView()
             }
 
-            Tab("Settings", systemImage: "gearshape") {
+            Tab("Settings", systemImage: "gearshape", value: .settings) {
                 SettingsView()
             }
         }
