@@ -136,7 +136,7 @@ struct BeanDetailView: View {
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(extractionSummary(extraction))
+                                    Text(ExtractionFormatter.summary(extraction))
                                         .font(.subheadline)
                                     Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
                                         .font(.caption)
@@ -186,23 +186,6 @@ struct BeanDetailView: View {
         bean.roastDate != nil ||
         bean.openedDate != nil ||
         (bean.notes != nil && !bean.notes!.isEmpty)
-    }
-
-    private func extractionSummary(_ extraction: Extraction) -> String {
-        var parts: [String] = []
-        if let dose = extraction.doseIn {
-            parts.append(String(format: "%.1fg", dose))
-        }
-        if let yield = extraction.yieldOut {
-            parts.append(String(format: "%.1fg", yield))
-        }
-        let recipe = parts.joined(separator: " → ")
-
-        if let time = extraction.timeSeconds {
-            let timeStr = String(format: "%.0fs", time)
-            return recipe.isEmpty ? timeStr : "\(recipe) · \(timeStr)"
-        }
-        return recipe.isEmpty ? extraction.grindSetting : recipe
     }
 
     private func daysSince(_ date: Date) -> Int {

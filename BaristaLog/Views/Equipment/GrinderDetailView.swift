@@ -11,60 +11,121 @@ struct GrinderDetailView: View {
     @State private var showingEditSheet = false
 
     var body: some View {
-        Form {
-            // MARK: - Photo
-            if let imageData = grinder.imageData, let uiImage = UIImage(data: imageData) {
-                Section {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxHeight: 300)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .listRowInsets(EdgeInsets())
-                }
-            }
-
-            // MARK: - Basic Info
+        List {
+            // MARK: - Hero Section
             Section {
-                LabeledContent("Name", value: grinder.name)
-                if let brand = grinder.brand {
-                    LabeledContent("Brand", value: brand)
-                }
-                if let burrType = grinder.burrType {
-                    LabeledContent("Burr Type", value: burrType)
-                }
-                if let burrSize = grinder.burrSize {
-                    LabeledContent("Burr Size", value: burrSize)
-                }
-            }
+                VStack(alignment: .leading, spacing: 16) {
+                    // Image or placeholder
+                    if let imageData = grinder.imageData, let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 160)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.brandBrown.opacity(0.12))
+                            .frame(height: 160)
+                            .overlay {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundStyle(Color.brandBrown)
+                            }
+                    }
 
-            // MARK: - Adjustment
-            if let adjustmentNotes = grinder.adjustmentNotes {
-                Section("Adjustment") {
-                    Text(adjustmentNotes)
-                        .foregroundStyle(.secondary)
-                }
-            }
+                    // Name and subtitle
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(grinder.name)
+                            .font(.title)
+                            .fontWeight(.bold)
 
-            // MARK: - Notes
-            if let notes = grinder.notes, !notes.isEmpty {
-                Section("Notes") {
-                    Text(notes)
-                        .foregroundStyle(.secondary)
+                        if let brand = grinder.brand {
+                            Text(brand)
+                                .font(.body)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if let adjustmentNotes = grinder.adjustmentNotes {
+                            Text(adjustmentNotes)
+                                .font(.subheadline)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
                 }
+                .listRowInsets(EdgeInsets())
+                .padding(.horizontal, 20)
+                .padding(.top, 0)
+                .padding(.bottom, 0)
+            }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+
+            // MARK: - Details
+            if hasDetails {
+                Section {
+                    if let burrType = grinder.burrType {
+                        LabeledContent("Burr Type", value: burrType)
+                    }
+                    if let burrSize = grinder.burrSize {
+                        LabeledContent("Burr Size", value: burrSize)
+                    }
+                    if let notes = grinder.notes, !notes.isEmpty {
+                        Text(notes)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else if grinder.extractions?.isEmpty ?? true {
+                Section {
+                    VStack(spacing: 16) {
+                        Text("Add burr type, burr size,\nnotes and more.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Text("Add Details")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(Color.brandBrown)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                }
+                .listRowBackground(Color.clear)
             }
 
             // MARK: - Extractions
             if let extractions = grinder.extractions, !extractions.isEmpty {
                 Section("Extractions (\(extractions.count))") {
-                    ForEach(extractions.sorted(by: { $0.date > $1.date }).prefix(5), id: \.self) { extraction in
-                        HStack {
-                            Text(extraction.grindSetting)
-                            Spacer()
-                            Text(extraction.bean?.name ?? "–")
-                                .foregroundStyle(.secondary)
-                            Text(extraction.date, format: .dateTime.day().month())
-                                .foregroundStyle(.secondary)
+                    ForEach(Array(extractions.sorted(by: { $0.date > $1.date }).prefix(5))) { extraction in
+                        NavigationLink {
+                            ExtractionDetailView(extraction: extraction)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(ExtractionFormatter.summary(extraction))
+                                        .font(.subheadline)
+                                    Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if let rating = extraction.rating {
+                                    HStack(spacing: 2) {
+                                        ForEach(1...5, id: \.self) { star in
+                                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                                .foregroundStyle(star <= rating ? Color.brandBrown : .secondary)
+                                        }
+                                    }
+                                    .font(.caption2)
+                                }
+                            }
+                            .padding(.vertical, 2)
                         }
                     }
                     if extractions.count > 5 {
@@ -74,6 +135,7 @@ struct GrinderDetailView: View {
                 }
             }
         }
+        .contentMargins(.top, 8, for: .scrollContent)
         .navigationTitle("Grinder")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -87,6 +149,13 @@ struct GrinderDetailView: View {
             AddGrinderView(grinderToEdit: grinder)
         }
     }
+
+    private var hasDetails: Bool {
+        grinder.burrType != nil ||
+        grinder.burrSize != nil ||
+        (grinder.notes != nil && !grinder.notes!.isEmpty)
+    }
+
 }
 
 #Preview {
