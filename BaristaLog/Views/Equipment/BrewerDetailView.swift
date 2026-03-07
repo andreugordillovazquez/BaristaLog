@@ -101,38 +101,7 @@ struct BrewerDetailView: View {
 
             // MARK: - Extractions
             if let extractions = brewer.extractions, !extractions.isEmpty {
-                Section("Extractions (\(extractions.count))") {
-                    ForEach(Array(extractions.sorted(by: { $0.date > $1.date }).prefix(5))) { extraction in
-                        NavigationLink {
-                            ExtractionDetailView(extraction: extraction)
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(ExtractionFormatter.summary(extraction))
-                                        .font(.subheadline)
-                                    Text(extraction.date, format: .dateTime.day().month(.abbreviated).year())
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let rating = extraction.rating {
-                                    HStack(spacing: 2) {
-                                        ForEach(1...5, id: \.self) { star in
-                                            Image(systemName: star <= rating ? "star.fill" : "star")
-                                                .foregroundStyle(star <= rating ? Color.brandBrown : .secondary)
-                                        }
-                                    }
-                                    .font(.caption2)
-                                }
-                            }
-                            .padding(.vertical, 2)
-                        }
-                    }
-                    if extractions.count > 5 {
-                        Text("and \(extractions.count - 5) more...")
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                ExtractionPreviewSection(extractions: extractions, title: brewer.name)
             }
         }
         .contentMargins(.top, 8, for: .scrollContent)
