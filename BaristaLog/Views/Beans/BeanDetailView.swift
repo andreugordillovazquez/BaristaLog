@@ -199,10 +199,19 @@ struct BeanDetailView: View {
         let recipe = parts.joined(separator: " → ")
 
         if let time = extraction.timeSeconds {
-            let timeStr = String(format: "%.0fs", time)
+            let timeStr = formatTime(time)
             return recipe.isEmpty ? timeStr : "\(recipe) · \(timeStr)"
         }
         return recipe.isEmpty ? extraction.grindSetting : recipe
+    }
+
+    private func formatTime(_ seconds: Double) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        if mins > 0 {
+            return "\(mins)m \(secs)s"
+        }
+        return "\(secs)s"
     }
 
     private func daysSince(_ date: Date) -> Int {
