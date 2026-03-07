@@ -338,6 +338,20 @@ enum PreviewContainer {
             flavorTags: ["Chocolate", "Sweet", "Spicy"]
         )
 
+        let bean4 = Bean(
+            name: "Kenya Nyeri",
+            roaster: "Tim Wendelboe",
+            origin: "Kenya",
+            roastDate: Calendar.current.date(byAdding: .day, value: -60, to: .now),
+            openedDate: Calendar.current.date(byAdding: .day, value: -45, to: .now),
+            process: "Washed",
+            roastLevel: "Light",
+            varietal: "SL28",
+            altitude: "1800-2000",
+            flavorTags: ["Fruity", "Berry", "Citrus"],
+            finishedDate: Calendar.current.date(byAdding: .day, value: -10, to: .now)
+        )
+
         // Grinders
         let grinder1 = Grinder(
             name: "Niche Zero",
@@ -433,6 +447,7 @@ enum PreviewContainer {
             brewer: brewer3
         )
 
+        context.insert(bean4)
         context.insert(extraction1)
         context.insert(extraction2)
         context.insert(extraction3)

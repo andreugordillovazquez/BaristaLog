@@ -48,6 +48,12 @@ final class Bean {
     /// Flavor profile tags stored as a JSON array by SwiftData
     var flavorTags: [String]?
 
+    /// The date when this bag was finished/archived
+    var finishedDate: Date?
+
+    /// Whether this bean bag has been finished
+    var isFinished: Bool { finishedDate != nil }
+
     /// Image of the coffee bag or beans
     /// Stored externally to avoid database bloat with large binary data
     @Attribute(.externalStorage) var imageData: Data?
@@ -83,7 +89,8 @@ final class Bean {
         roastLevel: String? = nil,
         varietal: String? = nil,
         altitude: String? = nil,
-        flavorTags: [String]? = nil
+        flavorTags: [String]? = nil,
+        finishedDate: Date? = nil
     ) {
         self.name = name
         self.roaster = roaster
@@ -97,5 +104,6 @@ final class Bean {
         self.varietal = varietal
         self.altitude = altitude
         self.flavorTags = flavorTags
+        self.finishedDate = finishedDate
     }
 }

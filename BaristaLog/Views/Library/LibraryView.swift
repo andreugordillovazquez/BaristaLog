@@ -8,17 +8,35 @@ import SwiftData
 
 struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Bean.name) private var beans: [Bean]
+    @Query(filter: #Predicate<Bean> { $0.finishedDate == nil }, sort: \Bean.name)
+    private var activeBeans: [Bean]
+    @Query(filter: #Predicate<Bean> { $0.finishedDate != nil }, sort: \Bean.name)
+    private var finishedBeans: [Bean]
     @Query(sort: \Grinder.name) private var grinders: [Grinder]
     @Query(sort: \Brewer.name) private var brewers: [Brewer]
 
+    @State private var showFinishedBeans = false
     @State private var showingAddBean = false
     @State private var showingAddGrinder = false
     @State private var showingAddBrewer = false
     @State private var showingAddMenu = false
 
     private var isCompletelyEmpty: Bool {
-        beans.isEmpty && grinders.isEmpty && brewers.isEmpty
+        activeBeans.isEmpty && finishedBeans.isEmpty && grinders.isEmpty && brewers.isEmpty
+    }
+
+    private static let beanPreviewLimit = 5
+
+    private var displayedBeans: [Bean] {
+        showFinishedBeans ? activeBeans + finishedBeans : activeBeans
+    }
+
+    private var previewBeans: [Bean] {
+        Array(displayedBeans.prefix(Self.beanPreviewLimit))
+    }
+
+    private var hasMoreBeans: Bool {
+        displayedBeans.count > Self.beanPreviewLimit
     }
 
     var body: some View {
@@ -30,7 +48,7 @@ struct LibraryView: View {
                     List {
                         // MARK: - Beans Section
                         Section {
-                            if beans.isEmpty {
+                            if displayedBeans.isEmpty {
                                 Button {
                                     showingAddBean = true
                                 } label: {
@@ -38,14 +56,21 @@ struct LibraryView: View {
                                         .foregroundStyle(Color.brandBrown)
                                 }
                             } else {
-                                ForEach(beans) { bean in
+                                ForEach(previewBeans) { bean in
                                     NavigationLink {
                                         BeanDetailView(bean: bean)
                                     } label: {
                                         BeanRowView(bean: bean)
                                     }
                                 }
-                                .onDelete(perform: deleteBeans)
+                                if hasMoreBeans {
+                                    NavigationLink {
+                                        AllBeansView(showFinishedBeans: $showFinishedBeans)
+                                    } label: {
+                                        Text("See All \(displayedBeans.count) Beans")
+                                            .foregroundStyle(Color.brandBrown)
+                                    }
+                                }
                             }
                         } header: {
                             Text("Beans")
@@ -108,24 +133,38 @@ struct LibraryView: View {
             .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button {
-                            showingAddBean = true
-                        } label: {
-                            Label("Add Bean", systemImage: "leaf")
+                    HStack(spacing: 12) {
+                        if !finishedBeans.isEmpty {
+                            Button {
+                                withAnimation {
+                                    showFinishedBeans.toggle()
+                                }
+                            } label: {
+                                Label(
+                                    showFinishedBeans ? "Hide Finished" : "Show Finished",
+                                    systemImage: showFinishedBeans ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle"
+                                )
+                            }
                         }
-                        Button {
-                            showingAddGrinder = true
+                        Menu {
+                            Button {
+                                showingAddBean = true
+                            } label: {
+                                Label("Add Bean", systemImage: "leaf")
+                            }
+                            Button {
+                                showingAddGrinder = true
+                            } label: {
+                                Label("Add Grinder", systemImage: "gearshape")
+                            }
+                            Button {
+                                showingAddBrewer = true
+                            } label: {
+                                Label("Add Brewer", systemImage: "cup.and.saucer")
+                            }
                         } label: {
-                            Label("Add Grinder", systemImage: "gearshape")
+                            Label("Add", systemImage: "plus")
                         }
-                        Button {
-                            showingAddBrewer = true
-                        } label: {
-                            Label("Add Brewer", systemImage: "cup.and.saucer")
-                        }
-                    } label: {
-                        Label("Add", systemImage: "plus")
                     }
                 }
             }
@@ -142,14 +181,6 @@ struct LibraryView: View {
                 Button("Add Bean")    { showingAddBean = true }
                 Button("Add Grinder") { showingAddGrinder = true }
                 Button("Add Brewer")  { showingAddBrewer = true }
-            }
-        }
-    }
-
-    private func deleteBeans(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(beans[index])
             }
         }
     }
@@ -184,6 +215,7 @@ struct BeanRowView: View {
                     .scaledToFill()
                     .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .opacity(bean.isFinished ? 0.5 : 1)
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
@@ -192,15 +224,31 @@ struct BeanRowView: View {
                     Image(systemName: "leaf.fill")
                         .foregroundStyle(Color.brandBrown)
                 }
+                .opacity(bean.isFinished ? 0.5 : 1)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(bean.name)
                     .font(.headline)
-                if let roaster = bean.roaster {
+                if let finishedDate = bean.finishedDate {
+                    Text("Finished \(finishedDate, format: .dateTime.day().month(.abbreviated))")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else if let roaster = bean.roaster {
                     Text(roaster)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
+            }
+            .opacity(bean.isFinished ? 0.6 : 1)
+            if bean.isFinished {
+                Spacer()
+                Text("Finished")
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.brandBrown.opacity(0.15))
+                    .foregroundStyle(Color.brandBrown)
+                    .clipShape(Capsule())
             }
         }
         .padding(.vertical, 2)
@@ -325,6 +373,75 @@ struct LibraryEmptyStateView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - All Beans View
+
+struct AllBeansView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Binding var showFinishedBeans: Bool
+
+    @Query(filter: #Predicate<Bean> { $0.finishedDate == nil }, sort: \Bean.name)
+    private var activeBeans: [Bean]
+    @Query(filter: #Predicate<Bean> { $0.finishedDate != nil }, sort: \Bean.name)
+    private var finishedBeans: [Bean]
+
+    @State private var showingAddBean = false
+
+    private var displayedBeans: [Bean] {
+        showFinishedBeans ? activeBeans + finishedBeans : activeBeans
+    }
+
+    var body: some View {
+        List {
+            ForEach(displayedBeans) { bean in
+                NavigationLink {
+                    BeanDetailView(bean: bean)
+                } label: {
+                    BeanRowView(bean: bean)
+                }
+            }
+            .onDelete(perform: deleteBeans)
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Beans")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack(spacing: 12) {
+                    if !finishedBeans.isEmpty {
+                        Button {
+                            withAnimation {
+                                showFinishedBeans.toggle()
+                            }
+                        } label: {
+                            Label(
+                                showFinishedBeans ? "Hide Finished" : "Show Finished",
+                                systemImage: showFinishedBeans ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle"
+                            )
+                        }
+                    }
+                    Button {
+                        showingAddBean = true
+                    } label: {
+                        Label("Add Bean", systemImage: "plus")
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddBean) {
+            AddBeanView()
+        }
+    }
+
+    private func deleteBeans(offsets: IndexSet) {
+        let beans = displayedBeans
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(beans[index])
+            }
+        }
     }
 }
 

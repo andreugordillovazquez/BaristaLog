@@ -12,6 +12,8 @@ struct AddBeanView: View {
     @Environment(\.dismiss) private var dismiss
 
     var beanToEdit: Bean?
+    var basedOnBean: Bean?
+    var onCreate: ((Bean) -> Void)?
 
     @State private var name: String = ""
     @State private var roaster: String = ""
@@ -40,6 +42,7 @@ struct AddBeanView: View {
     ]
 
     private var isEditing: Bool { beanToEdit != nil }
+    private var isNewBag: Bool { basedOnBean != nil && beanToEdit == nil }
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty
@@ -173,7 +176,7 @@ struct AddBeanView: View {
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle(isEditing ? "Edit Bean" : "New Bean")
+            .navigationTitle(isEditing ? "Edit Bean" : isNewBag ? "New Bag" : "New Bean")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -213,6 +216,17 @@ struct AddBeanView: View {
                     selectedFlavorTags = Set(bean.flavorTags ?? [])
                     showRoastDatePicker = bean.roastDate != nil
                     showOpenedDatePicker = bean.openedDate != nil
+                } else if let bean = basedOnBean {
+                    // Copy metadata but leave dates and notes blank
+                    name = bean.name
+                    roaster = bean.roaster ?? ""
+                    origin = bean.origin ?? ""
+                    photoData = bean.imageData
+                    process = bean.process ?? ""
+                    roastLevel = bean.roastLevel ?? ""
+                    varietal = bean.varietal ?? ""
+                    altitude = bean.altitude ?? ""
+                    selectedFlavorTags = Set(bean.flavorTags ?? [])
                 }
                 isNameFocused = true
             }
@@ -256,6 +270,7 @@ struct AddBeanView: View {
                 flavorTags: flavorTagsArray
             )
             modelContext.insert(bean)
+            onCreate?(bean)
         }
 
         dismiss()
