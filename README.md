@@ -1,86 +1,50 @@
 # BaristaLog
 
-An iOS app for tracking espresso extractions, built with SwiftUI and SwiftData.
+A beautifully simple iOS app for tracking your espresso extractions and dialing in the perfect shot.
 
-## Overview
+Built with SwiftUI and SwiftData for iOS 26+.
 
-BaristaLog helps baristas and coffee enthusiasts log shots, organize equipment and beans, and improve their extractions over time with on-device AI coaching powered by Apple Intelligence.
+## What it does
 
-**Target:** iOS 26+
-**Architecture:** SwiftUI + SwiftData
-**Design:** Apple-native, minimal, low barrier to entry with depth for advanced users
+BaristaLog helps you log every shot you pull — what beans you used, your grind setting, dose, yield, time, and how it tasted. Over time, you build a history that helps you dial in faster and waste less coffee.
 
-## Features
+### Extraction Tracking
+Record your shots with all the details that matter: equipment, grind setting, dose, yield, time, and a star rating. Use **"From Recent"** to quickly repeat your last setup.
 
-- **Extraction Logging** — Record shots with grind setting, dose, yield, time, and a 1–5 star rating. Required fields (bean, grinder, brewer, grind setting) keep data consistent. "From Recent" duplicates your last shot's settings for quick logging.
-- **Library** — Manage your beans (with roaster, origin, roast/opened dates, and photos), grinders (burr type, size, adjustment range), and brewers (brew type, portafilter/basket specs).
-- **AI Coaching** — On-device analysis using the Foundation Models framework compares your current shot to your history and suggests adjustments. Runs privately on-device via Apple Intelligence.
-- **Onboarding** — A 6-step flow sets up units, default equipment, beans, and coaching preferences before the first extraction.
-- **Settings** — Weight units (g/oz), decimal precision, app theme (system/light/dark), default grinder and brewer, and data reset.
+### Bean Library
+Keep track of your beans with roaster, origin, process, roast level, flavor tags, and photos. When you finish a bag, mark it as done and start a new one — your history stays with the old bag.
 
-## Project Structure
+### Equipment Management
+Organize your grinders and brewers with specs like burr type, portafilter size, and adjustment notes.
 
-```
-BaristaLog/
-├── BrewApp.swift                 # App entry point, ModelContainer setup
-├── RootView.swift                # Root view with onboarding overlay
-├── MainTabView.swift             # Root TabView (3 tabs)
-├── ContentView.swift             # Extractions list
-├── Models/
-│   ├── Extraction.swift
-│   ├── Bean.swift
-│   ├── Grinder.swift
-│   ├── Brewer.swift
-│   └── WeightPreferences.swift   # WeightUnit, WeightPrecision, AppTheme enums
-├── Views/
-│   ├── AddExtractionView.swift
-│   ├── ExtractionDetailView.swift
-│   ├── CoachingView.swift
-│   ├── Beans/
-│   ├── Equipment/
-│   ├── Library/
-│   ├── Settings/
-│   └── Onboarding/
-└── Services/
-    └── BaristaCoach.swift        # Apple Intelligence integration
-```
+### AI Coaching
+Get personalized brewing tips powered by Apple Intelligence. The on-device AI compares your current shot to your history and suggests what to adjust next — all processed privately on your device.
 
-## Data Models
+## Screenshots
 
-### Extraction
-| Field | Type | Required |
-|---|---|---|
-| date | Date | Yes (auto) |
-| grindSetting | String | Yes |
-| bean | Bean | Yes |
-| grinder | Grinder | Yes |
-| brewer | Brewer | Yes |
-| doseIn | Double? | No |
-| yieldOut | Double? | No |
-| timeSeconds | Double? | No |
-| rating | Int? | No (1–5) |
-| notes | String? | No |
+*Coming soon*
 
-### Bean / Grinder / Brewer
-Each has a required `name`, optional metadata fields, an optional photo (`imageData`), and a back-reference to related extractions. All relationships use a `.nullify` delete rule so deleting equipment doesn't cascade-delete your shot history.
+## Requirements
+
+- iOS 26+
+- Xcode 26+
+- Apple Intelligence capable device (for AI coaching)
 
 ## Building
 
 ```bash
-xcodebuild -scheme Brew \
+xcodebuild -scheme BaristaLog \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   build
 ```
 
-Supported simulators (iOS 26.2): iPhone 17, iPhone 17 Pro, iPhone 17 Pro Max, iPhone Air, iPhone 16e, iPad (A16), iPad Air, iPad Pro, iPad mini.
+## Tech Stack
 
-## Preview Support
+- **SwiftUI** — Fully declarative UI with Liquid Glass
+- **SwiftData** — Local persistence with zero setup
+- **Foundation Models** — On-device AI coaching via Apple Intelligence
+- **PhotosUI** — Bean and equipment photos
 
-`PreviewContainer` in `ContentView.swift` provides an in-memory `ModelContainer` with sample data for SwiftUI previews:
+## License
 
-```swift
-#Preview {
-    SomeView()
-        .modelContainer(PreviewContainer.container)
-}
-```
+*TBD*
